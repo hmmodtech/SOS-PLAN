@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تقويم شهر نوفمبر 2026 - خطة الطوارئ والدوام</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SOS Gaza SSO - Monthly Calendar & Task Planner</title>
   <style>
     :root {
       --bg: #080b10;
@@ -11,22 +11,22 @@
       --cell: #111722;
       --border: #15222e;
       --green: #39ff14;
-      --green-glow: rgba(57, 255, 20, 0.2);
+      --green-glow: rgba(57, 255, 20, 0.25);
       --amber: #e8c84a;
       --red: #ff3c3c;
       --text: #e6edf3;
       --muted: #7d8590;
-      --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      --font: 'JetBrains Mono', 'Fira Code', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     body {
       background-color: var(--bg);
       color: var(--text);
       font-family: var(--font);
       min-height: 100vh;
-      padding: 20px 10px 40px;
+      padding: 12px 10px 40px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -34,94 +34,154 @@
 
     .container {
       width: 100%;
-      max-width: 850px;
+      max-width: 800px;
     }
 
-    .header-box {
+    /* Top HUD */
+    .top-header {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-box h1 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    .title-box p {
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Lang Toggle Button */
+    .btn-lang {
+      background: var(--bg);
+      border: 1px solid var(--green);
+      color: var(--green);
+      font-family: var(--font);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 0 10px rgba(57, 255, 20, 0.15);
+      transition: all 0.2s;
+    }
+
+    .btn-lang:active {
+      background: rgba(57, 255, 20, 0.2);
+    }
+
+    /* Cycle Bar */
+    .cycle-bar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 14px;
+      margin-bottom: 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .title-area h1 {
-      font-size: 1.15rem;
-      color: var(--green);
-      display: flex;
-      align-items: center;
       gap: 8px;
-      margin-bottom: 4px;
+      font-size: 0.72rem;
     }
 
-    .title-area p {
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    .badge-cycle {
-      background: rgba(57, 255, 20, 0.1);
-      border: 1px solid var(--green);
+    .cycle-select {
+      background: var(--bg);
+      border: 1px solid var(--border);
       color: var(--green);
-      font-size: 0.75rem;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-weight: bold;
+      font-family: var(--font);
+      font-size: 0.72rem;
+      padding: 4px 8px;
+      border-radius: 4px;
     }
 
-    /* تقويم الجدول الشهري الكلاسيكي */
-    .calendar-wrapper {
+    /* Monthly Grid Calendar */
+    .calendar-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 20px;
+      padding: 14px;
+      margin-bottom: 16px;
       overflow-x: auto;
     }
 
-    .month-header {
+    .calendar-head-title {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
-      padding-bottom: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
       border-bottom: 1px solid var(--border);
     }
 
-    .month-title {
-      font-size: 1.05rem;
-      font-weight: bold;
-      color: var(--text);
+    .cal-month-name {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--green);
+    }
+
+    .cal-hint {
+      font-size: 0.65rem;
+      color: var(--muted);
     }
 
     .calendar-table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 600px;
+      min-width: 580px;
     }
 
     .calendar-table th {
-      padding: 10px;
-      font-size: 0.82rem;
+      padding: 8px 4px;
+      font-size: 0.68rem;
       color: var(--muted);
       border-bottom: 1px solid var(--border);
       text-align: center;
+      font-weight: 700;
     }
 
     .calendar-table td {
       width: 14.28%;
-      height: 90px;
+      height: 78px;
       vertical-align: top;
-      padding: 6px;
+      padding: 5px;
       border: 1px solid var(--border);
       background: var(--bg);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
     }
 
     .calendar-table td:hover {
@@ -131,41 +191,46 @@
 
     .calendar-table td.empty {
       background: transparent;
-      border-color: rgba(21, 34, 46, 0.4);
+      border-color: rgba(21, 34, 46, 0.3);
       cursor: default;
     }
 
     .calendar-table td.weekend {
-      background: rgba(13, 18, 26, 0.5);
-      opacity: 0.5;
+      background: rgba(13, 18, 26, 0.4);
+      opacity: 0.45;
       cursor: default;
     }
 
     .calendar-table td.active-day {
       border: 1px solid var(--green);
-      box-shadow: inset 0 0 8px var(--green-glow);
+      background: rgba(57, 255, 20, 0.08);
+      box-shadow: inset 0 0 10px var(--green-glow);
     }
 
-    .day-num {
-      font-size: 0.85rem;
-      font-weight: bold;
-      color: var(--text);
+    .cell-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 4px;
     }
 
-    .work-tag {
-      font-size: 0.62rem;
-      padding: 1px 4px;
-      border-radius: 3px;
-      background: rgba(57, 255, 20, 0.15);
-      color: var(--green);
+    .day-num {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text);
     }
 
-    .day-task-snippet {
-      font-size: 0.68rem;
+    .day-badge {
+      font-size: 0.55rem;
+      padding: 1px 4px;
+      border-radius: 2px;
+      background: rgba(57, 255, 20, 0.15);
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .cell-snippet {
+      font-size: 0.62rem;
       color: var(--muted);
       line-height: 1.25;
       overflow: hidden;
@@ -174,16 +239,17 @@
       -webkit-box-orient: vertical;
     }
 
-    /* كرت تفاصيل اليوم المختار */
-    .detail-card {
+    /* Selected Day Tasks Card */
+    .task-details-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-right: 4px solid var(--green);
+      border-left: 4px solid var(--green);
       border-radius: 8px;
-      padding: 16px;
+      padding: 14px;
+      margin-bottom: 14px;
     }
 
-    .detail-header {
+    .task-details-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -192,248 +258,684 @@
       border-bottom: 1px solid var(--border);
     }
 
-    .detail-day-name {
-      font-size: 1rem;
-      font-weight: bold;
+    .task-day-title {
+      font-size: 0.95rem;
+      font-weight: 800;
       color: var(--green);
     }
 
-    .detail-box {
+    .btn-edit {
+      background: var(--bg);
+      border: 1px solid var(--green);
+      color: var(--green);
+      font-family: var(--font);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-edit:active {
+      background: rgba(57, 255, 20, 0.2);
+    }
+
+    .task-details-body {
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 12px;
-      font-size: 0.82rem;
+      font-size: 0.75rem;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
 
-    .detail-row-title {
-      font-size: 0.72rem;
+    .detail-label {
+      font-size: 0.62rem;
       color: var(--amber);
-      font-weight: bold;
+      font-weight: 700;
+      text-transform: uppercase;
       margin-bottom: 2px;
     }
 
-    .detail-row-text {
+    .detail-text {
       color: var(--text);
       line-height: 1.45;
+    }
+
+    /* Edit Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(8, 11, 16, 0.9);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 14px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      background: var(--card);
+      border: 1px solid var(--green);
+      box-shadow: 0 0 25px rgba(57, 255, 20, 0.25);
+      width: 100%;
+      max-width: 500px;
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      font-size: 0.85rem;
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .form-input, .form-textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.75rem;
+      padding: 8px;
+      border-radius: 4px;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--green);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--green);
+      color: var(--bg);
+      border: none;
+      font-family: var(--font);
+      font-weight: 800;
+      font-size: 0.8rem;
+      padding: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+
+    /* RTL Support */
+    [dir="rtl"] {
+      text-align: right;
+    }
+    [dir="rtl"] .task-details-card {
+      border-left: 1px solid var(--border);
+      border-right: 4px solid var(--green);
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <div class="header-box">
-      <div class="title-area">
-        <h1>🗓️ تقويم مهام وخطة الدوام (نوفمبر 2026)</h1>
-        <p>نظام العمل الإنساني: الأحد إلى الخميس (20 يوم عمل)</p>
+    <!-- Top Header HUD -->
+    <div class="top-header">
+      <div class="title-box">
+        <h1><span class="pulse-dot"></span> <span id="lbl-title">SOS GAZA SSO CALENDAR</span></h1>
+        <p id="lbl-sub">30-Day Mission Calendar • Mawasi Khan Yunis Operations</p>
       </div>
-      <div class="badge-cycle">أول 30 يوماً</div>
+      <button class="btn-lang" onclick="toggleLang()">
+        <span>🌐</span> <b id="lbl-lang-btn">عربي</b>
+      </button>
     </div>
 
-    <!-- تقويم شهري شبكي -->
-    <div class="calendar-wrapper">
-      <div class="month-header">
-        <span class="month-title">نوفمبر / November 2026</span>
-        <span style="font-size:0.75rem; color:var(--muted);">اضغط على أي يوم عمل لعرض تفاصيله</span>
+    <!-- Cycle Bar -->
+    <div class="cycle-bar">
+      <div>
+        <span style="color:var(--muted);" id="lbl-start">Cycle Start: </span>
+        <select class="cycle-select" id="start-date-select" onchange="changeStartDate(this.value)">
+          <option value="15">15 Nov 2026 (Sunday)</option>
+          <option value="16">16 Nov 2026 (Monday)</option>
+        </select>
+      </div>
+      <div>
+        <span style="color:var(--muted);" id="lbl-workdays">Workdays: </span>
+        <b style="color:var(--green);" id="lbl-workdays-val">20 Days (Sun - Thu)</b>
+      </div>
+    </div>
+
+    <!-- Full Month Grid Calendar -->
+    <div class="calendar-card">
+      <div class="calendar-head-title">
+        <span class="cal-month-name" id="lbl-month-name">NOVEMBER 2026</span>
+        <span class="cal-hint" id="lbl-hint">Tap any work day to view and edit details</span>
       </div>
 
       <table class="calendar-table">
         <thead>
-          <tr>
-            <th>الأحد</th>
-            <th>الإثنين</th>
-            <th>الثلاثاء</th>
-            <th>الأربعاء</th>
-            <th>الخميس</th>
-            <th>الجمعة</th>
-            <th>السبت</th>
+          <tr id="cal-th-row">
+            <th>SUN</th>
+            <th>MON</th>
+            <th>TUE</th>
+            <th>WED</th>
+            <th>THU</th>
+            <th>FRI</th>
+            <th>SAT</th>
           </tr>
         </thead>
-        <tbody id="cal-body">
-          <!-- الأسبوع 1 -->
-          <tr>
-            <td><div class="day-num">1</div><div class="day-task-snippet">تجهيزات</div></td>
-            <td><div class="day-num">2</div><div class="day-task-snippet">-</div></td>
-            <td><div class="day-num">3</div><div class="day-task-snippet">-</div></td>
-            <td><div class="day-num">4</div><div class="day-task-snippet">-</div></td>
-            <td><div class="day-num">5</div><div class="day-task-snippet">نهاية الإخطار</div></td>
-            <td class="weekend"><div class="day-num">6</div></td>
-            <td class="weekend"><div class="day-num">7</div></td>
-          </tr>
-          <!-- الأسبوع 2 -->
-          <tr>
-            <td><div class="day-num">8</div><div class="day-task-snippet">تحضير</div></td>
-            <td><div class="day-num">9</div><div class="day-task-snippet">-</div></td>
-            <td><div class="day-num">10</div><div class="day-task-snippet">-</div></td>
-            <td><div class="day-num">11</div><div class="day-task-snippet">-</div></td>
-            <td><div class="day-num">12</div><div class="day-task-snippet">-</div></td>
-            <td class="weekend"><div class="day-num">13</div></td>
-            <td class="weekend"><div class="day-num">14</div></td>
-          </tr>
-          <!-- الأسبوع 3 (بداية خطة الدوام 20 يوم) -->
-          <tr>
-            <td class="active-day" onclick="showTask(1)"><div class="day-num"><span>15</span><span class="work-tag">D1</span></div><div class="day-task-snippet">المباشرة وتدقيق حماية الطفل</div></td>
-            <td onclick="showTask(2)"><div class="day-num"><span>16</span><span class="work-tag">D2</span></div><div class="day-task-snippet">ملفات مخيم المواصي وقوائم الأطفال</div></td>
-            <td onclick="showTask(3)"><div class="day-num"><span>17</span><span class="work-tag">D3</span></div><div class="day-task-snippet">سجل الحوادث وفريق الأزمات</div></td>
-            <td onclick="showTask(4)"><div class="day-num"><span>18</span><span class="work-tag">D4</span></div><div class="day-task-snippet">التشبيك الخارجي (INSO)</div></td>
-            <td onclick="showTask(5)"><div class="day-num"><span>19</span><span class="work-tag">D5</span></div><div class="day-task-snippet">تجهيز قوائم التدقيق</div></td>
-            <td class="weekend"><div class="day-num">20</div></td>
-            <td class="weekend"><div class="day-num">21</div></td>
-          </tr>
-          <!-- الأسبوع 4 -->
-          <tr>
-            <td onclick="showTask(6)"><div class="day-num"><span>22</span><span class="work-tag">D6</span></div><div class="day-task-snippet">فحص سياج وبوابات المواصي</div></td>
-            <td onclick="showTask(7)"><div class="day-num"><span>23</span><span class="work-tag">D7</span></div><div class="day-task-snippet">كهرباء خيام الأطفال</div></td>
-            <td onclick="showTask(8)"><div class="day-num"><span>24</span><span class="work-tag">D8</span></div><div class="day-task-snippet">طفايات الحريق والمطبخ</div></td>
-            <td onclick="showTask(9)"><div class="day-num"><span>25</span><span class="work-tag">D9</span></div><div class="day-task-snippet">السيارات والإسعافات</div></td>
-            <td onclick="showTask(10)"><div class="day-num"><span>26</span><span class="work-tag">D10</span></div><div class="day-task-snippet">مصفوفة الثغرات والشراء</div></td>
-            <td class="weekend"><div class="day-num">27</div></td>
-            <td class="weekend"><div class="day-num">28</div></td>
-          </tr>
-          <!-- الأسبوع 5 -->
-          <tr>
-            <td onclick="showTask(11)"><div class="day-num"><span>29</span><span class="work-tag">D11</span></div><div class="day-task-snippet">أتمتة تصاريح الحركة</div></td>
-            <td onclick="showTask(12)"><div class="day-num"><span>30</span><span class="work-tag">D12</span></div><div class="day-task-snippet">شجرة اتصال الطوارئ</div></td>
-            <td class="empty"></td>
-            <td class="empty"></td>
-            <td class="empty"></td>
-            <td class="empty"></td>
-            <td class="empty"></td>
-          </tr>
+        <tbody id="calendar-body">
+          <!-- Calendar cells rendered by JS -->
         </tbody>
       </table>
     </div>
 
-    <!-- تفاصيل اليوم المختار -->
-    <div class="detail-card">
-      <div class="detail-header">
-        <span class="detail-day-name" id="det-title">اليوم 1 • الأحد 15 نوفمبر 2026</span>
+    <!-- Selected Day Detail View -->
+    <div class="task-details-card">
+      <div class="task-details-header">
+        <span class="task-day-title" id="det-day-header">DAY 1 DETAILS</span>
+        <button class="btn-edit" onclick="openEditModal()" id="btn-edit">✎ EDIT TASK</button>
       </div>
-      <div class="detail-box">
+      <div class="task-details-body">
         <div>
-          <div class="detail-row-title">المهمة الرئيسية:</div>
-          <div class="detail-row-text" id="det-task">المباشرة الإدارية وتفعيل الصلاحيات وتدقيق سياسة حماية وصون الطفل.</div>
+          <div class="detail-label" id="lbl-det-task">Core Operational Task:</div>
+          <div class="detail-text" id="det-task">-</div>
         </div>
         <div>
-          <div class="detail-row-title">من مين تطلب:</div>
-          <div class="detail-row-text" id="det-req">الموارد البشرية (البطاقة، العقد، الدليل) وتكنولوجيا المعلومات (الإيميل، الهاتف، الشريحة).</div>
+          <div class="detail-label" id="lbl-det-req">From Whom to Request:</div>
+          <div class="detail-text" id="det-req">-</div>
         </div>
         <div>
-          <div class="detail-row-title">شو تعمل بالضبط:</div>
-          <div class="detail-row-text" id="det-act">تهيئة مجلدات العمل، تفعيل الحسابات، ودراسة سياسة حماية وصون الطفل التابعة للمنظمة.</div>
+          <div class="detail-label" id="lbl-det-act">Exact Action to Execute:</div>
+          <div class="detail-text" id="det-act">-</div>
         </div>
         <div>
-          <div class="detail-row-title">مين تكلّم وتنسق معه:</div>
-          <div class="detail-row-text" id="det-talk">المدير المباشر (مدير المنطقة) لتحديد أولويات مخيم المواصي الفورية.</div>
+          <div class="detail-label" id="lbl-det-talk">Whom to Contact / Debrief:</div>
+          <div class="detail-text" id="det-talk">-</div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Edit Task Modal -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span id="modal-heading">EDIT TASK</span>
+        <button onclick="closeEditModal()" style="background:none; border:none; color:var(--muted); font-size:1.1rem; cursor:pointer;">✕</button>
+      </div>
+      <form id="edit-form" onsubmit="saveTaskEdit(event)">
+        <div class="form-group">
+          <label class="form-label" id="lbl-form-title">Task Title</label>
+          <input type="text" id="form-task" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="lbl-form-req">From Whom to Request</label>
+          <input type="text" id="form-req" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="lbl-form-act">Action to Execute</label>
+          <textarea id="form-act" class="form-textarea" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="lbl-form-talk">Whom to Contact / Debrief</label>
+          <input type="text" id="form-talk" class="form-input" />
+        </div>
+        <button type="submit" class="btn-submit" id="btn-submit">SAVE MISSION CHANGES</button>
+      </form>
+    </div>
+  </div>
+
   <script>
-    const TASKS = {
-      1: {
-        date: "اليوم 1 • الأحد 15 نوفمبر 2026",
-        task: "المباشرة الإدارية وتفعيل الصلاحيات وتدقيق سياسة حماية وصون الطفل.",
-        req: "الموارد البشرية (البطاقة، العقد، الدليل) وتكنولوجيا المعلومات (الإيميل، الهاتف، الشريحة).",
-        act: "تهيئة مجلدات العمل، تفعيل الحسابات، ودراسة سياسة حماية وصون الطفل التابعة للمنظمة.",
-        talk: "المدير المباشر (مدير المنطقة) لتحديد أولويات مخيم المواصي الفورية."
+    let isAr = false;
+    let startDayNum = 15; // 15 or 16
+    let selectedDayIndex = 1;
+
+    // Master 20 Days Plan
+    const MASTER_TASKS = [
+      {
+        dayIndex: 1,
+        titleEn: "Day 1: Onboarding, Access Creds & Child Safeguarding",
+        titleAr: "اليوم 1: المباشرة، الصلاحيات وتدقيق حماية الطفل",
+        reqEn: "HR (signed JD, badge ID, staff handbook) & IT (SOS mail, work phone/SIM).",
+        reqAr: "الموارد البشرية (الوصف الوظيفي، بطاقة العمل، الدليل) وتكنولوجيا المعلومات (الإيميل، الهاتف، الشريحة).",
+        actEn: "Set up workspace storage folders, enable 2FA on SOS cloud, and study SOS Child Safeguarding Policy.",
+        actAr: "تهيئة مجلدات العمل، تفعيل الحسابات والبريد، ودراسة سياسة حماية وصون الطفل المعتمدة.",
+        talkEn: "Area Director / Line Manager to outline immediate Mawasi camp protection concerns.",
+        talkAr: "المدير المباشر (مدير المنطقة) لتحديد أولويات حماية مخيم المواصي الفورية."
       },
-      2: {
-        date: "اليوم 2 • الإثنين 16 نوفمبر 2026",
-        task: "حصر ملفات مخيم المواصي وقوائم الأطفال الأيتام وغير المصحوبين.",
-        req: "إدارة البرامج (مخطط مخيم المواصي، كشف الأطفال الأيتام، جدول المربيات الليلي).",
-        act: "تدقيق أرقام الطوارئ ومطابقة خيام مبيت الأطفال الأيتام وغير المصحوبين UASC بالمواصي.",
-        talk: "مسؤول إدارة الحالة وحماية الطفل لفهم النزاعات العائلية ومخاطر استرداد الأطفال."
+      {
+        dayIndex: 2,
+        titleEn: "Day 2: Mawasi Camp Layout & UASC Custody Files",
+        titleAr: "اليوم 2: حصر ملفات مخيم المواصي وقوائم الأطفال الأيتام",
+        reqEn: "Programs Dept (Mawasi camp layout, orphan headcount, night caregiver roster).",
+        reqAr: "إدارة البرامج (مخطط مخيم المواصي، كشف الأطفال الأيتام، جدول المربيات الليلي).",
+        actEn: "Verify emergency contact list and inspect tent allocation map for unaccompanied children.",
+        actAr: "تدقيق أرقام الطوارئ ومطابقة خيام مبيت الأطفال الأيتام وغير المصحوبين UASC بالمواصي.",
+        talkEn: "Child Protection Specialist regarding family tracing risks and custody attempts.",
+        talkAr: "مسؤول إدارة الحالة وحماية الطفل لفهم النزاعات العائلية ومخاطر استرداد الأطفال."
       },
-      3: {
-        date: "اليوم 3 • الثلاثاء 17 نوفمبر 2026",
-        task: "تأسيس سجل الحوادث الميداني والاندماج في فريق الأزمات.",
-        req: "مدير العمليات: تفويض الانضمام لقنوات فريق إدارة الأزمات والقيادة (SRT / SLT).",
-        act: "بناء سجل الحوادث الميداني الموحد لتوثيق أي خرق أو تهديد لمخيم المواصي.",
-        talk: "فريق الاستجابة للأزمات (SRT): الاتفاق على ساعة الإحاطة الصباحية (08:30 صباحاً)."
+      {
+        dayIndex: 3,
+        titleEn: "Day 3: Incident Log Pipeline & SRT Integration",
+        titleAr: "اليوم 3: تأسيس سجل الحوادث والاندماج في فريق الأزمات",
+        reqEn: "Operations Director: Access to emergency crisis channels (SRT/SLT).",
+        reqAr: "مدير العمليات: تفويض الانضمام لقنوات فريق إدارة الأزمات والقيادة (SRT / SLT).",
+        actEn: "Deploy Master Security Incident Tracker sheet with geocodes focused on Khan Yunis.",
+        actAr: "بناء سجل الحوادث الميداني الموحد لتوثيق أي خرق أو تهديد لمخيم المواصي.",
+        talkEn: "Security Response Team (SRT): Agree on daily morning briefing time at 08:30.",
+        talkAr: "فريق الاستجابة للأزمات (SRT): الاتفاق على ساعة الإحاطة الصباحية (08:30 صباحاً)."
       },
-      4: {
-        date: "اليوم 4 • الأربعاء 18 نوفمبر 2026",
-        task: "التشبيك الأمني الخارجي (INSO، UNDSS والمنظمات القريبة).",
-        req: "المدير المباشر: خطاب تفويض لتفعيل العضوية في شبكات التنسيق الإنساني.",
-        act: "تفعيل التنبيهات مع INSO وUNDSS لمتابعة تطورات قطاع خانيونس والمواصي لحظياً.",
-        talk: "مسؤولي الأمن بالمنظمات والمستشفيات الميدانية المجاورة بالمواصي لتبادل التحديثات."
+      {
+        dayIndex: 4,
+        titleEn: "Day 4: External Security Coordination (INSO, UNDSS, Peers)",
+        titleAr: "اليوم 4: التشبيك الأمني الخارجي (INSO، UNDSS والمنظمات القريبة)",
+        reqEn: "Line Manager: Official credential letter for INSO / UNDSS security networks.",
+        reqAr: "المدير المباشر: خطاب تفويض لتفعيل العضوية في شبكات التنسيق الإنساني.",
+        actEn: "Register with INSO Gaza for flash SMS alerts, map alerts, and humanitarian security briefings.",
+        actAr: "تفعيل التنبيهات مع INSO وUNDSS لمتابعة تطورات قطاع خانيونس والمواصي لحظياً.",
+        talkEn: "Peer security officers in neighboring Mawasi camps and field clinics.",
+        talkAr: "مسؤولي الأمن بالمنظمات والمستشفيات الميدانية المجاورة بالمواصي لتبادل التحديثات."
       },
-      5: {
-        date: "اليوم 5 • الخميس 19 نوفمبر 2026",
-        task: "تقرير نهاية الأسبوع الأول وتجهيز قوائم التدقيق الميداني.",
-        req: "اللوجستيات: تأمين سيارة ومعدات الفحص الميداني لجولات الأسبوع الثاني.",
-        act: "إعداد قائمة فحص السلامة لمخيم أطفال المواصي (الأسوار، الطاقة، الحرائق، الخيام).",
-        talk: "مدير مخيم المواصي لتأكيد موعد الجولة التفتيشية الشاملة مع الحراس والمربيات."
+      {
+        dayIndex: 5,
+        titleEn: "Day 5: Week 1 Synthesis & Camp Audit Checklist Prep",
+        titleAr: "اليوم 5: تقرير نهاية الأسبوع الأول وتجهيز قوائم التدقيق",
+        reqEn: "Logistics: Assigned vehicle and inspection tools for physical site audits next week.",
+        reqAr: "اللوجستيات: تأمين سيارة ومعدات الفحص الميداني لجولات الأسبوع الثاني.",
+        actEn: "Draft Mawasi Child-Camp Security Checklist (perimeter, power, fire, lighting, safe tent).",
+        actAr: "إعداد قائمة فحص السلامة لمخيم أطفال المواصي (الأسوار، الطاقة، الحرائق، الخيام).",
+        talkEn: "Mawasi Camp Manager to confirm next week's physical inspection timetable.",
+        talkAr: "مدير مخيم المواصي لتأكيد موعد الجولة التفتيشية الشاملة مع الحراس والمربيات."
       },
-      6: {
-        date: "اليوم 6 • الأحد 22 نوفمبر 2026",
-        task: "فحص السياج الخارجي وبوابات مخيم المواصي ومنع السلاح.",
-        req: "مدير المخيم ومسؤول الحراسة: فتح محيط المخيم الخارجي وسجلات الزوار.",
-        act: "فحص متانة الأسوار، الكشافات الليلية، والتأكيد الصارم على منع أي سلاح بالبوابات.",
-        talk: "طاقم الحراسة: التشديد على حظر دخول أي غريب أو زائر بعد غروب الشمس."
+      {
+        dayIndex: 6,
+        titleEn: "Day 6: Mawasi Perimeter & Anti-Intrusion Night Audit",
+        titleAr: "اليوم 6: فحص السياج الخارجي وبوابات مخيم المواصي",
+        reqEn: "Camp Manager & Head Guard: Access to perimeter boundary, gates, and visitor logs.",
+        reqAr: "مدير المخيم ومسؤول الحراسة: فتح محيط المخيم الخارجي وسجلات الزوار.",
+        actEn: "Inspect fence integrity, entry locks, solar floodlights, and enforce ZERO WEAPONS POLICY.",
+        actAr: "فحص متانة الأسوار، الكشافات الليلية، والتأكيد الصارم على منع أي سلاح بالبوابات.",
+        talkEn: "Guard force shift: Reinforce strict visitor vetting and total lockdown after 17:30.",
+        talkAr: "طاقم الحراسة: التشديد على حظر دخول أي غريب أو زائر بعد غروب الشمس."
       },
-      7: {
-        date: "اليوم 7 • الإثنين 23 نوفمبر 2026",
-        task: "فحص تمديدات خيام الأطفال وخطر الصعق والحرائق.",
-        req: "المشرفة المقيمة: مرافقة كاملة لممرات وخيام إيواء الأطفال الأيتام.",
-        act: "عزل الأسلاك الكهربائية المكشوفة لحماية الأطفال، وإزالة حبال التعثر من الممرات.",
-        talk: "الأمهات البديلات: الاستماع لملاحظاتهن حول أمان الخيام والضوضاء الليلية."
+      {
+        dayIndex: 7,
+        titleEn: "Day 7: Children Tent Electrical & Structural Hazard Check",
+        titleAr: "اليوم 7: فحص تمديدات خيام الأطفال وخطر الصعق الكهربائي",
+        reqEn: "Head Caregiver: Access to residential tents and caravans housing orphaned children.",
+        reqAr: "المشرفة المقيمة: مرافقة كاملة لممرات وخيام إيواء الأطفال الأيتام.",
+        actEn: "Check solar invertor lines, isolate exposed wiring, and clear tent guy ropes in paths.",
+        actAr: "عزل الأسلاك الكهربائية المكشوفة لحماية الأطفال، وإزالة حبال التعثر من الممرات.",
+        talkEn: "Foster mothers & caregivers: Listen to night safety concerns and cold/rain leaks.",
+        talkAr: "الأمهات البديلات: الاستماع لملاحظاتهن حول أمان الخيام والضوضاء الليلية."
       },
-      8: {
-        date: "اليوم 8 • الثلاثاء 24 نوفمبر 2026",
-        task: "فحص طفايات الحريق وأسطوانات الغاز والمطبخ بالمخيم.",
-        req: "مسؤول اللوجستيات وطباخ المخيم: فحص أسطوانات الغاز ومعدات الإطفاء.",
-        act: "فحص صلاحية وضغط طفايات البودرة وتوفر براميل الرمل الرطب لإخماد حرائق الشوادر.",
-        talk: "طاقم المطبخ: منع اقتراب الأطفال نهائياً من منطقة الطهي والأسطوانات."
+      {
+        dayIndex: 8,
+        titleEn: "Day 8: Fire Extinguishers & Fuel/LPG Storage Audit",
+        titleAr: "اليوم 8: فحص طفايات الحريق وأسطوانات الغاز والمطبخ",
+        reqEn: "Logistics & Camp Cook: Access to kitchen LPG cylinders, burners, and safety gear.",
+        reqAr: "مسؤول اللوجستيات وطباخ المخيم: فحص أسطوانات الغاز ومعدات الإطفاء.",
+        actEn: "Inspect Dry Powder extinguishers, check pressure gauges, test wet sand fire buckets.",
+        actAr: "فحص صلاحية وضغط طفايات البودرة وتوفر براميل الرمل الرطب لإخماد حرائق الشوادر.",
+        talkEn: "Kitchen staff: Enforce child exclusion perimeter around cooking and boiling areas.",
+        talkAr: "طاقم المطبخ: منع اقتراب الأطفال نهائياً من منطقة الطهي والأسطوانات."
       },
-      9: {
-        date: "اليوم 9 • الأربعاء 25 نوفمبر 2026",
-        task: "تدقيق مركبات الحركة وحقائب الإسعاف والطوارئ.",
-        req: "مسؤول الأسطول: سجلات صيانة السيارات ورخص السائقين وحقائب الطوارئ داخلها.",
-        act: "فحص جهوزية السيارات للمسير في رمال المواصي، أحزمة السحب، وحقائب الإسعاف.",
-        talk: "السائقين: مراجعة خطوط الإخلاء الطبي المعتمدة لأقرب مستشفى ميداني فعال."
+      {
+        dayIndex: 9,
+        titleEn: "Day 9: Fleet Vehicle & Evacuation Medical Kits",
+        titleAr: "اليوم 9: تدقيق مركبات الحركة وحقائب الإسعاف والطوارئ",
+        reqEn: "Fleet Supervisor: Vehicle maintenance logs, driver licenses, and in-car safety kits.",
+        reqAr: "مسؤول الأسطول: سجلات صيانة السيارات ورخص السائقين وحقائب الطوارئ داخلها.",
+        actEn: "Audit spare tires (sand terrain condition), tow ropes, first aid kits, and car chargers.",
+        actAr: "فحص جهوزية السيارات للمسير في رمال المواصي، أحزمة السحب، وحقائب الإسعاف.",
+        talkEn: "Drivers: Brief on designated emergency transit corridors to Khan Yunis field clinics.",
+        talkAr: "السائقين: مراجعة خطوط الإخلاء الطبي المعتمدة لأقرب مستشفى ميداني فعال."
       },
-      10: {
-        date: "اليوم 10 • الخميس 26 نوفمبر 2026",
-        task: "مصفوفة الثغرات وطلبات الشراء والصيانة العاجلة.",
-        req: "المشتريات / اللوجستيات: تسريع عروض الأسعار للإصلاحات الأمنية ومعدات السلامة.",
-        act: "تفريغ مصفوفة الثغرات وإصدار طلبات شراء رسمية لطفايات إضافية وكشافات طاقة شمسية.",
-        talk: "مدير المنطقة: اعتماد موازنة المشتريات العاجلة لسد الثغرات الميدانية."
+      {
+        dayIndex: 10,
+        titleEn: "Day 10: Findings Matrix & Urgent Safety Procurement",
+        titleAr: "اليوم 10: مصفوفة الثغرات وطلبات الشراء والصيانة العاجلة",
+        reqEn: "Procurement / Logistics: Priority price quotes for urgent safety equipment.",
+        reqAr: "المشتريات / اللوجستيات: تسريع عروض الأسعار للإصلاحات الأمنية ومعدات السلامة.",
+        actEn: "Consolidate Security Findings Matrix; issue PRs for missing extinguishers and solar lights.",
+        actAr: "تفريغ مصفوفة الثغرات وإصدار طلبات شراء رسمية لطفايات إضافية وكشافات طاقة شمسية.",
+        talkEn: "Area Director: Validate emergency purchase requisitions and repair budgets.",
+        talkAr: "مدير المنطقة: اعتماد موازنة المشتريات العاجلة لسد الثغرات الميدانية."
       },
-      11: {
-        date: "اليوم 11 • الأحد 29 نوفمبر 2026",
-        task: "أتمتة تصاريح الحركة ونظام التحقق الرقمي.",
-        req: "مدراء المشاريع: جدول التحركات الأسبوعية لبرامج رعاية الأطفال الميدانية.",
-        act: "تفعيل نموذج تصريح الحركة اليومي وتثبيت نقاط الإبلاغ الإلزامية عند التحرك والوصول.",
-        talk: "الفرق الميدانية والسائقين: التوجيه ببروتوكول رسائل التحقق (تحرك، في الموقع، عودة)."
+      {
+        dayIndex: 11,
+        titleEn: "Day 11: Movement Clearance & Check-in Automation",
+        titleAr: "اليوم 11: أتمتة تصاريح الحركة ونظام التحقق الرقمي",
+        reqEn: "Program Managers: Weekly operational movement schedule for child care staff.",
+        reqAr: "مدراء المشاريع: جدول التحركات الأسبوعية لبرامج رعاية الأطفال الميدانية.",
+        actEn: "Deploy standardized digital/paper Movement Clearance Form with check-in checkpoints.",
+        actAr: "تفعيل نموذج تصريح الحركة اليومي وتثبيت نقاط الإبلاغ الإلزامية عند التحرك والوصول.",
+        talkEn: "Field teams & drivers: Train on mandatory check-in intervals (departure, site, return).",
+        talkAr: "الفرق الميدانية والسائقين: التوجيه ببروتوكول رسائل التحقق (تحرك، في الموقع، عودة)."
       },
-      12: {
-        date: "اليوم 12 • الإثنين 30 نوفمبر 2026",
-        task: "إعادة هيكلة وتحديث شجرة الاتصال للطوارئ.",
-        req: "الموارد البشرية والمشرف: أحدث أرقام هواتف الموظفين والمربيات وبدائل الاتصال.",
-        act: "هيكلة شجرة الاتصال الهرمية السريعة لضمان تعميم أي إنذار في أقل من 5 دقائق.",
-        talk: "نقاط الاتصال المحورية: توضيح دورهم في تمرير البلاغ والتأكد من استلام الجميع."
+      {
+        dayIndex: 12,
+        titleEn: "Day 12: Emergency Cascading Phone Tree Restructure",
+        titleAr: "اليوم 12: إعادة هيكلة وتحديث شجرة الاتصال للطوارئ",
+        reqEn: "HR & Mawasi Site Supervisor: 100% updated mobile numbers and alternate SIMs.",
+        reqAr: "الموارد البشرية والمشرف: أحدث أرقام هواتف الموظفين والمربيات وبدائل الاتصال.",
+        actEn: "Structure hierarchical Phone Tree: Security Officer -> Site Leads -> Caregivers & Guards.",
+        actAr: "هيكلة شجرة الاتصال الهرمية السريعة لضمان تعميم أي إنذار في أقل من 5 دقائق.",
+        talkEn: "Focal tree leads: Clarify responsibility to relay emergency alert and report confirmation.",
+        talkAr: "نقاط الاتصال المحورية: توضيح دورهم في تمرير البلاغ والتأكد من استلام الجميع."
+      },
+      {
+        dayIndex: 13,
+        titleEn: "Day 13: Mawasi Transit Corridors & Medical Evac Mapping",
+        titleAr: "اليوم 13: مسارات التحرك الآمنة وخريطة النقاط الطبية",
+        reqEn: "INSO / UN GIS maps: Road condition and open access axes across Khan Yunis & coastal road.",
+        reqAr: "خرائط INSO: أحدث التحديثات حول الطرق والمحاور المفتوحة في خانيونس والشاطئ.",
+        actEn: "Map primary and alternate routes from Mawasi camp to Red Cross / UK-Med field clinics.",
+        actAr: "رسم المسارات الآمنة لنقل الطوارئ الطبية من المخيم إلى المستشفيات الميدانية.",
+        talkEn: "Logistics & drivers: Distribute laminated pocket transit maps with medical points.",
+        talkAr: "اللوجستيات والسائقين: توزيع خرائط طرق مصغرة ومغلفة مع أرقام الطوارئ الطبية."
+      },
+      {
+        dayIndex: 14,
+        titleEn: "Day 14: Telecom Blackout SOP & Non-Cellular Contingency",
+        titleAr: "اليوم 14: بروتوكول انقطاع الاتصالات والإنترنت التام",
+        reqEn: "Mawasi Site Supervisor: Inventory of whistles, horns, and solar flashlights.",
+        reqAr: "مشرف الموقع: جرد وسائل التنبيه اليدوية (صافرات، أبواق يدوية، كشافات).",
+        actEn: "Issue written Blackout SOP: freeze inter-governorate moves, set fixed-window check-ins.",
+        actAr: "إصدار بروتوكول انقطاع الاتصالات: تجميد الحركة وتحديد أوقات الفحص الميداني الثابتة.",
+        talkEn: "Area Director: Approve designated offline liaison runner protocol for urgent emergencies.",
+        talkAr: "إدارة المنطقة: اعتماد بروتوكول المراسل اليدوي ونقاط الالتقاء البديلة للطوارئ."
+      },
+      {
+        dayIndex: 15,
+        titleEn: "Day 15: Phone Tree Silent Cascade Test (Dry-Run)",
+        titleAr: "اليوم 15: اختبار تجريبي صامت لشجرة الاتصال",
+        reqEn: "Area Director: Approval to initiate cascading drill message at 10:00.",
+        reqAr: "مدير المنطقة: الموافقة على إطلاق رسالة اختبار شجرة الاتصال الساعة 10:00.",
+        actEn: "Dispatch test alert: 'DRILL - CONFIRM RECEIPT'. Track total minutes and dead nodes.",
+        actAr: "إطلاق رسالة: 'اختبار أمني تجريبي - يرجى تأكيد الاستلام'. وقياس زمن الاستجابة.",
+        talkEn: "Staff failing to respond within 15 min: Troubleshoot reception or update SIM numbers.",
+        talkAr: "الموظفين الذين تعثر وصول الرسالة إليهم: معرفة الخلل وتحديث الأرقام البديلة فوراً."
+      },
+      {
+        dayIndex: 16,
+        titleEn: "Day 16: Caregiver Security & Trauma-Informed Briefing",
+        titleAr: "اليوم 16: ورشة توعية أمنية للأمهات البديلات والمربيات",
+        reqEn: "Mawasi Camp Supervisor: 1-hour relief coverage for foster mothers in 2 batches.",
+        reqAr: "مشرف المخيم: تفريغ الأمهات البديلات على دفعتين لحضور ورشة التوعية.",
+        actEn: "Conduct safety briefing: calm shelter-in-place, staying away from outer tent canvas.",
+        actAr: "تدريب عملي: التصرف الهادئ عند الانفجارات القريبة والابتعاد عن أطراف الخيام.",
+        talkEn: "Foster mothers: Equip them with practical calm actions to prevent child panic.",
+        talkAr: "المربيات والأمهات: تقديم نصائح عملية لتهدئة روع الأطفال ومنع حالات الفزع الجماعي."
+      },
+      {
+        dayIndex: 17,
+        titleEn: "Day 17: Practical Fire Extinguisher Drill in Camp",
+        titleAr: "اليوم 17: تمرين عملي لمحاكاة إطفاء حريق في المخيم",
+        reqEn: "Camp Lead & Safety Wardens: Staging area isolated from children's sleeping quarters.",
+        reqAr: "مدير المخيم: تخصيص منطقة تدريب آمنة بعيداً عن خيام الأطفال لعدم فزعهم.",
+        actEn: "Run simulation: Whistle alarm -> sand bucket toss -> extinguisher discharge (PASS rule).",
+        actAr: "تنفيذ المحاكاة: إطلاق الإنذار، جلب براميل الرمل، وتطبيق قاعدة PASS بالطفايات.",
+        talkEn: "Guards and camp crew: Debrief on reaction time and nozzle positioning against wind.",
+        talkAr: "فريق الحراسة والعمال: تقييم زمن الاستجابة وتصحيح طريقة توجيه الطفايات."
+      },
+      {
+        dayIndex: 18,
+        titleEn: "Day 18: Child-Friendly Soft Shelter-in-Place Drill",
+        titleAr: "اليوم 18: محاكاة تمترس هادئة وصديقة للأطفال الأيتام",
+        reqEn: "Child Protection Lead & Mental Health (MHPSS) Team: Supervise interactive activity.",
+        reqAr: "أخصائي حماية الطفل والدعم النفسي: الإشراف المباشر على النشاط التفاعلي.",
+        actEn: "Guide children calmly into central reinforced communal tent without triggering alarm.",
+        actAr: "تنظيم نشاط هادئ لتوجيه الأطفال نحو الخيمة الأكثر تحصيناً دون إثارة أي هلع.",
+        talkEn: "MHPSS specialists: Review child reactions and address any triggered anxiety signs.",
+        talkAr: "الأخصائيين النفسيين: تقييم سلوك الأطفال والتأكد من عدم وجود أي أثر نفسي سلبي."
+      },
+      {
+        dayIndex: 19,
+        titleEn: "Day 19: Month 1 Comprehensive Security Review Report",
+        titleAr: "اليوم 19: صياغة التقرير الأمني التقييمي الأول للشهر الأول",
+        reqEn: "Logistics, Camp Manager, and Maintenance: Final status of resolved audit items.",
+        reqAr: "اللوجستيات ومسؤولي الصيانة: كشف نهائي بما تم إنجازه وإصلاحه من الثغرات.",
+        actEn: "Draft First 30-Day Comprehensive Security Evaluation covering Mawasi mitigations.",
+        actAr: "كتابة تقرير التقييم الأمني الشامل للشهر الأول وتوضيح التحصينات والتوصيات المتبقية.",
+        talkEn: "Area Director: Present executive summary and risk reduction roadmap.",
+        talkAr: "مدير المنطقة: استعراض ملخص التقرير والتقدم المحرز في رفع الجاهزية."
+      },
+      {
+        dayIndex: 20,
+        titleEn: "Day 20: 90-Day Operational Plan & SSP Ratification",
+        titleAr: "اليوم 20: إقرار خطة العمل للأشهر الثلاثة القادمة (90 يوماً)",
+        reqEn: "Senior Leadership Team: Final conference to approve future safety roadmap.",
+        reqAr: "فريق القيادة العليا: جلسة اعتماد مخرجات الشهر وخطة الربع القادم.",
+        actEn: "Ratify Mawasi Camp Site Security Plan (SSP) and schedule monthly routine inspection calendar.",
+        actAr: "اعتماد خطة أمن الموقع (SSP) لمخيم المواصي، وجدولة الفحص الدوري الشهري.",
+        talkEn: "Entire SOS Operations & Programs family: Transition officially into stable operations.",
+        talkAr: "كافة الزملاء في العمليات والبرامج: شكرهم على التعاون والانتقال للوضع التشغيلي المستقر."
       }
-    };
+    ];
 
-    function showTask(dayNum) {
-      const data = TASKS[dayNum];
-      if (!data) return;
+    let currentTasks = [];
 
-      document.querySelectorAll(".calendar-table td").forEach(td => td.classList.remove("active-day"));
-      event.currentTarget.classList.add("active-day");
-
-      document.getElementById("det-title").innerText = data.date;
-      document.getElementById("det-task").innerText = data.task;
-      document.getElementById("det-req").innerText = data.req;
-      document.getElementById("det-act").innerText = data.act;
-      document.getElementById("det-talk").innerText = data.talk;
+    function initData() {
+      try {
+        const stored = localStorage.getItem("sos_cal_grid_tasks_v2");
+        if (stored) {
+          currentTasks = JSON.parse(stored);
+        } else {
+          currentTasks = JSON.parse(JSON.stringify(MASTER_TASKS));
+        }
+      } catch (e) {
+        currentTasks = JSON.parse(JSON.stringify(MASTER_TASKS));
+      }
     }
+
+    function saveToStorage() {
+      try {
+        localStorage.setItem("sos_cal_grid_tasks_v2", JSON.stringify(currentTasks));
+      } catch (e) {}
+    }
+
+    // November 2026 starts on Sunday (Nov 1 = Sun)
+    // Days 1 to 30.
+    function renderCalendar() {
+      const tbody = document.getElementById("calendar-body");
+      tbody.innerHTML = "";
+
+      let dayCounter = 1;
+      let workDayIndex = 1;
+
+      // 5 weeks in Nov 2026
+      for (let w = 0; w < 5; w++) {
+        const tr = document.createElement("tr");
+        for (let col = 0; col < 7; col++) {
+          const td = document.createElement("td");
+          if (dayCounter > 30) {
+            td.className = "empty";
+            tr.appendChild(td);
+            continue;
+          }
+
+          const currentDayNum = dayCounter;
+          const isFri = (col === 5);
+          const isSat = (col === 6);
+
+          if (isFri || isSat) {
+            td.className = "weekend";
+            td.innerHTML = `<div class="cell-top"><span class="day-num">${currentDayNum}</span></div>`;
+          } else {
+            // Check if within the 20-workday window
+            if (currentDayNum >= startDayNum && workDayIndex <= 20) {
+              const thisWorkIdx = workDayIndex;
+              const taskObj = currentTasks.find(t => t.dayIndex === thisWorkIdx);
+              const titleText = isAr ? (taskObj.titleAr || taskObj.titleEn) : taskObj.titleEn;
+
+              if (thisWorkIdx === selectedDayIndex) {
+                td.className = "active-day";
+              }
+
+              td.onclick = () => selectDay(thisWorkIdx, td);
+
+              td.innerHTML = `
+                <div class="cell-top">
+                  <span class="day-num">${currentDayNum}</span>
+                  <span class="day-badge">D${thisWorkIdx}</span>
+                </div>
+                <div class="cell-snippet">${titleText}</div>
+              `;
+              workDayIndex++;
+            } else {
+              td.innerHTML = `<div class="cell-top"><span class="day-num">${currentDayNum}</span></div>`;
+            }
+          }
+
+          tr.appendChild(td);
+          dayCounter++;
+        }
+        tbody.appendChild(tr);
+      }
+    }
+
+    function selectDay(workIdx, tdElement) {
+      selectedDayIndex = workIdx;
+      document.querySelectorAll(".calendar-table td").forEach(el => el.classList.remove("active-day"));
+      if (tdElement) tdElement.classList.add("active-day");
+      renderTaskDetails();
+    }
+
+    function renderTaskDetails() {
+      const task = currentTasks.find(t => t.dayIndex === selectedDayIndex);
+      if (!task) return;
+
+      const title = isAr ? (task.titleAr || task.titleEn) : task.titleEn;
+      const req = isAr ? (task.reqAr || task.reqEn) : task.reqEn;
+      const act = isAr ? (task.actAr || task.actEn) : task.actEn;
+      const talk = isAr ? (task.talkAr || task.talkEn) : task.talkEn;
+
+      document.getElementById("det-day-header").innerText = isAr 
+        ? `تفاصيل اليوم ${task.dayIndex} (D${task.dayIndex})` 
+        : `DAY ${task.dayIndex} DETAILS (D${task.dayIndex})`;
+
+      document.getElementById("det-task").innerText = title;
+      document.getElementById("det-req").innerText = req || "-";
+      document.getElementById("det-act").innerText = act;
+      document.getElementById("det-talk").innerText = talk || "-";
+    }
+
+    function toggleLang() {
+      isAr = !isAr;
+      document.documentElement.lang = isAr ? "ar" : "en";
+      document.documentElement.dir = isAr ? "rtl" : "ltr";
+
+      document.getElementById("lbl-lang-btn").innerText = isAr ? "EN" : "عربي";
+      document.getElementById("lbl-title").innerText = isAr ? "تقويم دوام مسؤول الأمن SOS" : "SOS GAZA SSO CALENDAR";
+      document.getElementById("lbl-sub").innerText = isAr ? "خطة الـ 30 يوماً • عمليات مخيم مواصي خانيونس" : "30-Day Mission Calendar • Mawasi Khan Yunis Operations";
+      document.getElementById("lbl-start").innerText = isAr ? "بداية الدوام: " : "Cycle Start: ";
+      document.getElementById("lbl-workdays").innerText = isAr ? "أيام العمل: " : "Workdays: ";
+      document.getElementById("lbl-workdays-val").innerText = isAr ? "20 يوم (الأحد - الخميس)" : "20 Days (Sun - Thu)";
+      document.getElementById("lbl-month-name").innerText = isAr ? "نوفمبر 2026" : "NOVEMBER 2026";
+      document.getElementById("lbl-hint").innerText = isAr ? "اضغط على أي يوم عمل لعرض وتعديل تفاصيله" : "Tap any work day to view and edit details";
+      document.getElementById("btn-edit").innerText = isAr ? "✎ تعديل المهمة" : "✎ EDIT TASK";
+
+      document.getElementById("lbl-det-task").innerText = isAr ? "المهمة التشغيلية الرئيسية:" : "Core Operational Task:";
+      document.getElementById("lbl-det-req").innerText = isAr ? "من مين تطلب:" : "From Whom to Request:";
+      document.getElementById("lbl-det-act").innerText = isAr ? "شو تعمل بالضبط:" : "Exact Action to Execute:";
+      document.getElementById("lbl-det-talk").innerText = isAr ? "مين تكلّم وتنسق معه:" : "Whom to Contact / Debrief:";
+
+      // Headers row
+      const thRow = document.getElementById("cal-th-row");
+      if (isAr) {
+        thRow.innerHTML = "<th>الأحد</th><th>الإثنين</th><th>الثلاثاء</th><th>الأربعاء</th><th>الخميس</th><th>الجمعة</th><th>السبت</th>";
+      } else {
+        thRow.innerHTML = "<th>SUN</th><th>MON</th><th>TUE</th><th>WED</th><th>THU</th><th>FRI</th><th>SAT</th>";
+      }
+
+      renderCalendar();
+      renderTaskDetails();
+    }
+
+    function changeStartDate(val) {
+      startDayNum = parseInt(val, 10);
+      renderCalendar();
+      renderTaskDetails();
+    }
+
+    // Modal Edit Operations
+    function openEditModal() {
+      const task = currentTasks.find(t => t.dayIndex === selectedDayIndex);
+      if (!task) return;
+
+      document.getElementById("modal-heading").innerText = isAr ? `تعديل مهمة اليوم ${task.dayIndex}` : `EDIT DAY ${task.dayIndex} TASK`;
+      document.getElementById("lbl-form-title").innerText = isAr ? "عنوان المهمة" : "Task Title";
+      document.getElementById("lbl-form-req").innerText = isAr ? "من مين تطلب" : "From Whom to Request";
+      document.getElementById("lbl-form-act").innerText = isAr ? "شو تعمل بالضبط" : "Action to Execute";
+      document.getElementById("lbl-form-talk").innerText = isAr ? "مين تكلّم وتنسق معه" : "Whom to Contact / Debrief";
+      document.getElementById("btn-submit").innerText = isAr ? "حفظ التعديلات" : "SAVE MISSION CHANGES";
+
+      document.getElementById("form-task").value = isAr ? (task.titleAr || task.titleEn) : task.titleEn;
+      document.getElementById("form-req").value = isAr ? (task.reqAr || task.reqEn) : task.reqEn;
+      document.getElementById("form-act").value = isAr ? (task.actAr || task.actEn) : task.actEn;
+      document.getElementById("form-talk").value = isAr ? (task.talkAr || task.talkEn) : task.talkEn;
+
+      document.getElementById("edit-modal").classList.add("open");
+    }
+
+    function closeEditModal() {
+      document.getElementById("edit-modal").classList.remove("open");
+    }
+
+    function saveTaskEdit(e) {
+      e.preventDefault();
+      const task = currentTasks.find(t => t.dayIndex === selectedDayIndex);
+      if (!task) return;
+
+      const title = document.getElementById("form-task").value.trim();
+      const req = document.getElementById("form-req").value.trim();
+      const act = document.getElementById("form-act").value.trim();
+      const talk = document.getElementById("form-talk").value.trim();
+
+      if (isAr) {
+        task.titleAr = title;
+        task.reqAr = req;
+        task.actAr = act;
+        task.talkAr = talk;
+      } else {
+        task.titleEn = title;
+        task.reqEn = req;
+        task.actEn = act;
+        task.talkEn = talk;
+      }
+
+      saveToStorage();
+      closeEditModal();
+      renderCalendar();
+      renderTaskDetails();
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      initData();
+      renderCalendar();
+      renderTaskDetails();
+    });
   </script>
 </body>
 </html>
