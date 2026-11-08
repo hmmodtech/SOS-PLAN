@@ -1,1125 +1,439 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>SOS GAZA SSO - 3D TACTICAL COMMAND</title>
-  <!-- Three.js CDN with inline fallback compatibility -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تقويم شهر نوفمبر 2026 - خطة الطوارئ والدوام</title>
   <style>
     :root {
-      --bg-base: #080b10;
-      --bg-card: rgba(13, 18, 26, 0.88);
+      --bg: #080b10;
+      --card: #0d121a;
+      --cell: #111722;
       --border: #15222e;
-      --neon-green: #39ff14;
-      --neon-green-glow: rgba(57, 255, 20, 0.35);
-      --neon-amber: #e8c84a;
-      --neon-red: #ff3c3c;
-      --text-main: #e6edf3;
-      --text-muted: #7d8590;
-      --font-mono: 'JetBrains Mono', ui-monospace, Menlo, Monaco, Consolas, monospace;
+      --green: #39ff14;
+      --green-glow: rgba(57, 255, 20, 0.2);
+      --amber: #e8c84a;
+      --red: #ff3c3c;
+      --text: #e6edf3;
+      --muted: #7d8590;
+      --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background-color: var(--bg-base);
-      color: var(--text-main);
-      font-family: var(--font-mono);
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
       min-height: 100vh;
-      overflow-x: hidden;
-      padding-bottom: 75px;
-    }
-
-    /* 3D Canvas Background */
-    #canvas-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 1;
-      pointer-events: auto;
-    }
-
-    /* Matrix Scanlines */
-    .scanlines {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
-      background-size: 100% 4px;
-      z-index: 2;
-      pointer-events: none;
-      opacity: 0.6;
-    }
-
-    /* Content Overlay */
-    .app-wrapper {
-      position: relative;
-      z-index: 3;
-      pointer-events: none; /* Let 3D map be draggable behind empty areas */
-    }
-
-    header, .hud-bar, .interactive-panel, .bottom-nav, .task-card, .btn-hud {
-      pointer-events: auto;
-    }
-
-    /* Header HUD */
-    header {
-      background: rgba(13, 18, 26, 0.92);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 14px;
+      padding: 20px 10px 40px;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
       align-items: center;
-      position: sticky;
-      top: 0;
     }
 
-    .brand-title {
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: var(--neon-green);
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      text-shadow: 0 0 8px var(--neon-green-glow);
-    }
-
-    .live-dot {
-      width: 8px; height: 8px;
-      background: var(--neon-green);
-      border-radius: 50%;
-      box-shadow: 0 0 10px var(--neon-green);
-      animation: pulse 1.8s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 1; }
-    }
-
-    .brand-sub {
-      font-size: 0.6rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-
-    .btn-hud {
-      background: var(--bg-base);
-      border: 1px solid var(--border);
-      color: var(--neon-green);
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      padding: 5px 10px;
-      border-radius: 3px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .btn-hud:active {
-      border-color: var(--neon-green);
-      background: rgba(57, 255, 20, 0.15);
-    }
-
-    /* Telemetry HUD */
-    .hud-bar {
-      background: rgba(8, 11, 16, 0.85);
-      backdrop-filter: blur(6px);
-      border-bottom: 1px solid var(--border);
-      padding: 6px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.68rem;
-    }
-
-    /* 3D Viewport Controls Box */
-    .view3d-toggle-bar {
-      background: rgba(13, 18, 26, 0.85);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 6px 10px;
-      margin: 10px 14px 4px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.65rem;
-    }
-
-    main {
-      padding: 10px 14px;
+    .container {
+      width: 100%;
       max-width: 850px;
-      margin: 0 auto;
     }
 
-    .section-title {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin: 12px 0 8px 0;
+    .header-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
-    /* Calendar Grid */
-    .cal-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 5px;
+    .title-area h1 {
+      font-size: 1.15rem;
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .title-area p {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .badge-cycle {
+      background: rgba(57, 255, 20, 0.1);
+      border: 1px solid var(--green);
+      color: var(--green);
+      font-size: 0.75rem;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+
+    /* تقويم الجدول الشهري الكلاسيكي */
+    .calendar-wrapper {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+
+    .month-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
     }
 
-    .cal-cell {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      padding: 6px 2px;
+    .month-title {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: var(--text);
+    }
+
+    .calendar-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+
+    .calendar-table th {
+      padding: 10px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
       text-align: center;
-      border-radius: 3px;
-      cursor: pointer;
-      backdrop-filter: blur(4px);
     }
 
-    .cal-cell:hover, .cal-cell:active {
-      border-color: var(--neon-green);
-      box-shadow: 0 0 6px var(--neon-green-glow);
-    }
-
-    .cal-cell-d { font-size: 0.72rem; font-weight: bold; color: var(--neon-green); }
-    .cal-cell-w { font-size: 0.55rem; color: var(--text-muted); }
-
-    /* Task Cards */
-    .task-card {
-      background: var(--bg-card);
-      backdrop-filter: blur(10px);
+    .calendar-table td {
+      width: 14.28%;
+      height: 90px;
+      vertical-align: top;
+      padding: 6px;
       border: 1px solid var(--border);
-      border-left: 3px solid var(--neon-green);
-      border-radius: 4px;
-      padding: 12px;
-      margin-bottom: 12px;
-      transition: all 0.2s ease;
+      background: var(--bg);
+      cursor: pointer;
+      transition: all 0.2s;
     }
 
-    .task-card.priority-critical { border-left-color: var(--neon-red); }
-    .task-card.priority-warning { border-left-color: var(--neon-amber); }
+    .calendar-table td:hover {
+      border-color: var(--green);
+      background: var(--cell);
+    }
 
-    .task-top {
+    .calendar-table td.empty {
+      background: transparent;
+      border-color: rgba(21, 34, 46, 0.4);
+      cursor: default;
+    }
+
+    .calendar-table td.weekend {
+      background: rgba(13, 18, 26, 0.5);
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .calendar-table td.active-day {
+      border: 1px solid var(--green);
+      box-shadow: inset 0 0 8px var(--green-glow);
+    }
+
+    .day-num {
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: var(--text);
       display: flex;
       justify-content: space-between;
-      margin-bottom: 6px;
-    }
-
-    .badge {
-      font-size: 0.58rem;
-      padding: 2px 5px;
-      border-radius: 2px;
-      font-weight: 700;
-    }
-
-    .badge-day { background: #1b3b22; color: var(--neon-green); }
-    .badge-critical { background: rgba(255, 60, 60, 0.2); color: var(--neon-red); border: 1px solid var(--neon-red); }
-    .badge-warning { background: rgba(232, 200, 74, 0.2); color: var(--neon-amber); border: 1px solid var(--neon-amber); }
-    .badge-standard { background: var(--bg-base); color: var(--text-muted); border: 1px solid var(--border); }
-
-    .task-title {
-      font-size: 0.84rem;
-      font-weight: 700;
-      color: var(--text-main);
-      margin-bottom: 8px;
-      display: flex;
       align-items: center;
-      gap: 8px;
+      margin-bottom: 4px;
     }
 
-    .task-title input {
-      accent-color: var(--neon-green);
-      width: 15px; height: 15px;
-    }
-
-    .task-grid-info {
-      background: rgba(8, 11, 16, 0.9);
-      border: 1px solid var(--border);
-      padding: 8px 10px;
+    .work-tag {
+      font-size: 0.62rem;
+      padding: 1px 4px;
       border-radius: 3px;
-      font-size: 0.71rem;
+      background: rgba(57, 255, 20, 0.15);
+      color: var(--green);
+    }
+
+    .day-task-snippet {
+      font-size: 0.68rem;
+      color: var(--muted);
+      line-height: 1.25;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+
+    /* كرت تفاصيل اليوم المختار */
+    .detail-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-right: 4px solid var(--green);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .detail-day-name {
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--green);
+    }
+
+    .detail-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 0.82rem;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 10px;
     }
 
-    .grid-cell-label {
-      color: var(--neon-amber);
-      font-size: 0.6rem;
-      font-weight: 700;
-    }
-
-    .grid-cell-val {
-      color: var(--text-main);
-      line-height: 1.35;
-    }
-
-    .checklist {
-      margin-top: 8px;
-      padding-top: 6px;
-      border-top: 1px dashed var(--border);
+    .detail-row-title {
       font-size: 0.72rem;
+      color: var(--amber);
+      font-weight: bold;
+      margin-bottom: 2px;
     }
 
-    .check-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 4px;
-      cursor: pointer;
+    .detail-row-text {
+      color: var(--text);
+      line-height: 1.45;
     }
-
-    .check-item input { accent-color: var(--neon-green); }
-
-    /* Bottom Nav */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: rgba(13, 18, 26, 0.95);
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-around;
-      padding: 8px 0;
-      z-index: 100;
-    }
-
-    .nav-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      cursor: pointer;
-    }
-
-    .nav-btn.active { color: var(--neon-green); }
-
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    /* RTL */
-    [dir="rtl"] { text-align: right; }
-    [dir="rtl"] .task-card {
-      border-left: 1px solid var(--border);
-      border-right: 3px solid var(--neon-green);
-    }
-    [dir="rtl"] .task-card.priority-critical { border-right-color: var(--neon-red); }
-    [dir="rtl"] .task-card.priority-warning { border-right-color: var(--neon-amber); }
   </style>
 </head>
 <body>
 
-  <!-- Three.js 3D Background Canvas -->
-  <div id="canvas-container"></div>
-  <div class="scanlines"></div>
-
-  <div class="app-wrapper">
-    <header>
-      <div>
-        <div class="brand-title"><span class="live-dot"></span> SOS GAZA SSO</div>
-        <div class="brand-sub" id="lbl-sub">3D Tactical Operations • Mawasi Camp</div>
+  <div class="container">
+    <div class="header-box">
+      <div class="title-area">
+        <h1>🗓️ تقويم مهام وخطة الدوام (نوفمبر 2026)</h1>
+        <p>نظام العمل الإنساني: الأحد إلى الخميس (20 يوم عمل)</p>
       </div>
-      <div style="display:flex; gap:6px;">
-        <button class="btn-hud" onclick="toggle3DOverlay()"><span>🧊 3D FOCUS</span></button>
-        <button class="btn-hud" onclick="toggleLang()"><span>🌐</span> <b id="lbl-lang">عربي</b></button>
-      </div>
-    </header>
-
-    <div class="hud-bar">
-      <span>START: <b style="color:var(--neon-green);">15/16 NOV 2026</b></span>
-      <span>CYCLE: <b style="color:var(--neon-green);">SUN - THU (20 DAYS)</b></span>
-      <span>3D TERRAIN: <b style="color:var(--neon-green);" id="lbl-3d-status">ACTIVE</b></span>
+      <div class="badge-cycle">أول 30 يوماً</div>
     </div>
 
-    <div class="view3d-toggle-bar interactive-panel">
-      <span style="color:var(--text-muted);">🕹️ Drag / Touch background to rotate 3D Gaza strip & Mawasi camp</span>
-      <button class="btn-hud" onclick="resetCamera()" style="padding:2px 6px; font-size:0.6rem;">RESET VIEW</button>
+    <!-- تقويم شهري شبكي -->
+    <div class="calendar-wrapper">
+      <div class="month-header">
+        <span class="month-title">نوفمبر / November 2026</span>
+        <span style="font-size:0.75rem; color:var(--muted);">اضغط على أي يوم عمل لعرض تفاصيله</span>
+      </div>
+
+      <table class="calendar-table">
+        <thead>
+          <tr>
+            <th>الأحد</th>
+            <th>الإثنين</th>
+            <th>الثلاثاء</th>
+            <th>الأربعاء</th>
+            <th>الخميس</th>
+            <th>الجمعة</th>
+            <th>السبت</th>
+          </tr>
+        </thead>
+        <tbody id="cal-body">
+          <!-- الأسبوع 1 -->
+          <tr>
+            <td><div class="day-num">1</div><div class="day-task-snippet">تجهيزات</div></td>
+            <td><div class="day-num">2</div><div class="day-task-snippet">-</div></td>
+            <td><div class="day-num">3</div><div class="day-task-snippet">-</div></td>
+            <td><div class="day-num">4</div><div class="day-task-snippet">-</div></td>
+            <td><div class="day-num">5</div><div class="day-task-snippet">نهاية الإخطار</div></td>
+            <td class="weekend"><div class="day-num">6</div></td>
+            <td class="weekend"><div class="day-num">7</div></td>
+          </tr>
+          <!-- الأسبوع 2 -->
+          <tr>
+            <td><div class="day-num">8</div><div class="day-task-snippet">تحضير</div></td>
+            <td><div class="day-num">9</div><div class="day-task-snippet">-</div></td>
+            <td><div class="day-num">10</div><div class="day-task-snippet">-</div></td>
+            <td><div class="day-num">11</div><div class="day-task-snippet">-</div></td>
+            <td><div class="day-num">12</div><div class="day-task-snippet">-</div></td>
+            <td class="weekend"><div class="day-num">13</div></td>
+            <td class="weekend"><div class="day-num">14</div></td>
+          </tr>
+          <!-- الأسبوع 3 (بداية خطة الدوام 20 يوم) -->
+          <tr>
+            <td class="active-day" onclick="showTask(1)"><div class="day-num"><span>15</span><span class="work-tag">D1</span></div><div class="day-task-snippet">المباشرة وتدقيق حماية الطفل</div></td>
+            <td onclick="showTask(2)"><div class="day-num"><span>16</span><span class="work-tag">D2</span></div><div class="day-task-snippet">ملفات مخيم المواصي وقوائم الأطفال</div></td>
+            <td onclick="showTask(3)"><div class="day-num"><span>17</span><span class="work-tag">D3</span></div><div class="day-task-snippet">سجل الحوادث وفريق الأزمات</div></td>
+            <td onclick="showTask(4)"><div class="day-num"><span>18</span><span class="work-tag">D4</span></div><div class="day-task-snippet">التشبيك الخارجي (INSO)</div></td>
+            <td onclick="showTask(5)"><div class="day-num"><span>19</span><span class="work-tag">D5</span></div><div class="day-task-snippet">تجهيز قوائم التدقيق</div></td>
+            <td class="weekend"><div class="day-num">20</div></td>
+            <td class="weekend"><div class="day-num">21</div></td>
+          </tr>
+          <!-- الأسبوع 4 -->
+          <tr>
+            <td onclick="showTask(6)"><div class="day-num"><span>22</span><span class="work-tag">D6</span></div><div class="day-task-snippet">فحص سياج وبوابات المواصي</div></td>
+            <td onclick="showTask(7)"><div class="day-num"><span>23</span><span class="work-tag">D7</span></div><div class="day-task-snippet">كهرباء خيام الأطفال</div></td>
+            <td onclick="showTask(8)"><div class="day-num"><span>24</span><span class="work-tag">D8</span></div><div class="day-task-snippet">طفايات الحريق والمطبخ</div></td>
+            <td onclick="showTask(9)"><div class="day-num"><span>25</span><span class="work-tag">D9</span></div><div class="day-task-snippet">السيارات والإسعافات</div></td>
+            <td onclick="showTask(10)"><div class="day-num"><span>26</span><span class="work-tag">D10</span></div><div class="day-task-snippet">مصفوفة الثغرات والشراء</div></td>
+            <td class="weekend"><div class="day-num">27</div></td>
+            <td class="weekend"><div class="day-num">28</div></td>
+          </tr>
+          <!-- الأسبوع 5 -->
+          <tr>
+            <td onclick="showTask(11)"><div class="day-num"><span>29</span><span class="work-tag">D11</span></div><div class="day-task-snippet">أتمتة تصاريح الحركة</div></td>
+            <td onclick="showTask(12)"><div class="day-num"><span>30</span><span class="work-tag">D12</span></div><div class="day-task-snippet">شجرة اتصال الطوارئ</div></td>
+            <td class="empty"></td>
+            <td class="empty"></td>
+            <td class="empty"></td>
+            <td class="empty"></td>
+            <td class="empty"></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <main>
-      <!-- TAB 1: ALL 20 DAYS -->
-      <div id="tab-plan" class="tab-content active">
-        
-        <div class="section-title">
-          <span id="lbl-cal-hdr">20-Workday Mission Grid (Tap to jump)</span>
-        </div>
-
-        <!-- 4 Weeks Calendar Strip (Sunday to Thursday) -->
-        <div class="cal-grid">
-          <div class="cal-cell" onclick="jumpTo(1)"><div class="cal-cell-d">D1</div><div class="cal-cell-w">SUN</div></div>
-          <div class="cal-cell" onclick="jumpTo(2)"><div class="cal-cell-d">D2</div><div class="cal-cell-w">MON</div></div>
-          <div class="cal-cell" onclick="jumpTo(3)"><div class="cal-cell-d">D3</div><div class="cal-cell-w">TUE</div></div>
-          <div class="cal-cell" onclick="jumpTo(4)"><div class="cal-cell-d">D4</div><div class="cal-cell-w">WED</div></div>
-          <div class="cal-cell" onclick="jumpTo(5)"><div class="cal-cell-d">D5</div><div class="cal-cell-w">THU</div></div>
-
-          <div class="cal-cell" onclick="jumpTo(6)"><div class="cal-cell-d">D6</div><div class="cal-cell-w">SUN</div></div>
-          <div class="cal-cell" onclick="jumpTo(7)"><div class="cal-cell-d">D7</div><div class="cal-cell-w">MON</div></div>
-          <div class="cal-cell" onclick="jumpTo(8)"><div class="cal-cell-d">D8</div><div class="cal-cell-w">TUE</div></div>
-          <div class="cal-cell" onclick="jumpTo(9)"><div class="cal-cell-d">D9</div><div class="cal-cell-w">WED</div></div>
-          <div class="cal-cell" onclick="jumpTo(10)"><div class="cal-cell-d">D10</div><div class="cal-cell-w">THU</div></div>
-
-          <div class="cal-cell" onclick="jumpTo(11)"><div class="cal-cell-d">D11</div><div class="cal-cell-w">SUN</div></div>
-          <div class="cal-cell" onclick="jumpTo(12)"><div class="cal-cell-d">D12</div><div class="cal-cell-w">MON</div></div>
-          <div class="cal-cell" onclick="jumpTo(13)"><div class="cal-cell-d">D13</div><div class="cal-cell-w">TUE</div></div>
-          <div class="cal-cell" onclick="jumpTo(14)"><div class="cal-cell-d">D14</div><div class="cal-cell-w">WED</div></div>
-          <div class="cal-cell" onclick="jumpTo(15)"><div class="cal-cell-d">D15</div><div class="cal-cell-w">THU</div></div>
-
-          <div class="cal-cell" onclick="jumpTo(16)"><div class="cal-cell-d">D16</div><div class="cal-cell-w">SUN</div></div>
-          <div class="cal-cell" onclick="jumpTo(17)"><div class="cal-cell-d">D17</div><div class="cal-cell-w">MON</div></div>
-          <div class="cal-cell" onclick="jumpTo(18)"><div class="cal-cell-d">D18</div><div class="cal-cell-w">TUE</div></div>
-          <div class="cal-cell" onclick="jumpTo(19)"><div class="cal-cell-d">D19</div><div class="cal-cell-w">WED</div></div>
-          <div class="cal-cell" onclick="jumpTo(20)"><div class="cal-cell-d">D20</div><div class="cal-cell-w">THU</div></div>
-        </div>
-
-        <div class="section-title">
-          <span id="lbl-tasks-hdr">Complete 20-Day Detailed Operational Roster</span>
-        </div>
-
-        <!-- WEEK 1 -->
-        <!-- DAY 1 -->
-        <div class="task-card" id="day-1">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 1 • SUNDAY • WEEK 1</span>
-            <span class="badge badge-standard">STANDARD</span>
-          </div>
-          <div class="task-title" data-en="Day 1: Onboarding, Access Creds & Child Safeguarding" data-ar="اليوم 1: المباشرة، الصلاحيات وتدقيق حماية الطفل">Day 1: Onboarding, Access Creds & Child Safeguarding</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="HR (signed JD, badge ID, staff handbook) & IT (SOS mail, official SIM/phone)." data-ar="الموارد البشرية (الوصف الوظيفي، بطاقة العمل، الدليل) وتكنولوجيا المعلومات (الإيميل، الهاتف والشريحة).">HR (signed JD, badge ID, staff handbook) & IT (SOS mail, official SIM/phone).</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Set up workspace storage folders, enable 2FA on SOS cloud, and study SOS Child Safeguarding Policy." data-ar="إنشاء مجلدات حفظ البيانات، تفعيل الحسابات والبريد، وقراءة سياسة حماية وصون الطفل المعتمدة.">Set up workspace storage folders, enable 2FA on SOS cloud, and study SOS Child Safeguarding Policy.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Area Director / Line Manager to outline immediate Mawasi camp protection concerns." data-ar="المدير المباشر (مدير المنطقة) لتحديد أولويات حماية مخيم المواصي الفورية.">Area Director / Line Manager to outline immediate Mawasi camp protection concerns.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 2 -->
-        <div class="task-card" id="day-2">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 2 • MONDAY • WEEK 1</span>
-            <span class="badge badge-standard">STANDARD</span>
-          </div>
-          <div class="task-title" data-en="Day 2: Mawasi Camp Layout & UASC Custody Files" data-ar="اليوم 2: حصر ملفات مخيم المواصي وقوائم الأطفال الأيتام">Day 2: Mawasi Camp Layout & UASC Custody Files</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Programs Dept (Mawasi camp layout, orphan headcount, night caregiver roster)." data-ar="إدارة البرامج (مخطط مخيم المواصي، كشف الأطفال الأيتام، جدول المربيات الليلي).">Programs Dept (Mawasi camp layout, orphan headcount, night caregiver roster).</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Verify emergency contact list and inspect tent allocation map for unaccompanied children." data-ar="تدقيق أرقام الطوارئ ومطابقة خيام مبيت الأطفال الأيتام وغير المصحوبين UASC بالمواصي.">Verify emergency contact list and inspect tent allocation map for unaccompanied children.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Child Protection Specialist regarding family tracing risks and custody attempts." data-ar="مسؤول إدارة الحالة وحماية الطفل لفهم النزاعات العائلية ومخاطر استرداد الأطفال.">Child Protection Specialist regarding family tracing risks and custody attempts.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 3 -->
-        <div class="task-card priority-warning" id="day-3">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 3 • TUESDAY • WEEK 1</span>
-            <span class="badge badge-warning">WARNING</span>
-          </div>
-          <div class="task-title" data-en="Day 3: Incident Log Pipeline & SRT Integration" data-ar="اليوم 3: تأسيس سجل الحوادث والاندماج في فريق الأزمات">Day 3: Incident Log Pipeline & SRT Integration</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Operations Director: Access to emergency crisis channels (SRT/SLT)." data-ar="مدير العمليات: تفويض الانضمام لقنوات فريق إدارة الأزمات والقيادة (SRT / SLT).">Operations Director: Access to emergency crisis channels (SRT/SLT).</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Deploy Master Security Incident Tracker sheet with geocodes focused on Khan Yunis." data-ar="بناء سجل الحوادث الميداني الموحد لتوثيق أي خرق أو تهديد لمخيم المواصي.">Deploy Master Security Incident Tracker sheet with geocodes focused on Khan Yunis.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Security Response Team (SRT): Agree on daily morning briefing time at 08:30." data-ar="فريق الاستجابة للأزمات: الاتفاق على ساعة الإحاطة الصباحية (08:30 صباحاً).">Security Response Team (SRT): Agree on daily morning briefing time at 08:30.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 4 -->
-        <div class="task-card priority-warning" id="day-4">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 4 • WEDNESDAY • WEEK 1</span>
-            <span class="badge badge-warning">WARNING</span>
-          </div>
-          <div class="task-title" data-en="Day 4: External Security Coordination (INSO, UNDSS, Peers)" data-ar="اليوم 4: التشبيك الخارجي (INSO، UNDSS والمنظمات القريبة)">Day 4: External Security Coordination (INSO, UNDSS, Peers)</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Line Manager: Official credential letter for INSO / UNDSS security networks." data-ar="المدير المباشر: خطاب تفويض لتفعيل العضوية في شبكات التنسيق الإنساني.">Line Manager: Official credential letter for INSO / UNDSS security networks.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Register with INSO Gaza for flash SMS alerts, map alerts, and humanitarian security briefings." data-ar="تفعيل التنبيهات مع INSO وUNDSS لمتابعة تطورات قطاع خانيونس والمواصي لحظياً.">Register with INSO Gaza for flash SMS alerts, map alerts, and humanitarian security briefings.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Peer security officers in neighboring Mawasi camps and field clinics." data-ar="مسؤولي الأمن بالمنظمات والمستشفيات الميدانية المجاورة بالمواصي لتبادل التحديثات.">Peer security officers in neighboring Mawasi camps and field clinics.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 5 -->
-        <div class="task-card" id="day-5">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 5 • THURSDAY • WEEK 1</span>
-            <span class="badge badge-standard">STANDARD</span>
-          </div>
-          <div class="task-title" data-en="Day 5: Week 1 Synthesis & Camp Audit Checklist Prep" data-ar="اليوم 5: تقرير نهاية الأسبوع الأول وتجهيز قوائم التدقيق">Day 5: Week 1 Synthesis & Camp Audit Checklist Prep</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Logistics: Assigned vehicle and inspection tools for physical site audits next week." data-ar="اللوجستيات: تأمين سيارة ومعدات الفحص الميداني لجولات الأسبوع الثاني.">Logistics: Assigned vehicle and inspection tools for physical site audits next week.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Draft Mawasi Child-Camp Security Checklist (perimeter, power, fire, lighting, safe tent)." data-ar="إعداد قائمة فحص السلامة لمخيم أطفال المواصي (الأسوار، الطاقة، الحرائق، الخيام).">Draft Mawasi Child-Camp Security Checklist (perimeter, power, fire, lighting, safe tent).</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Mawasi Camp Manager to confirm next week's physical inspection timetable." data-ar="مدير مخيم المواصي لتأكيد موعد الجولة التفتيشية الشاملة مع الحراس والمربيات.">Mawasi Camp Manager to confirm next week's physical inspection timetable.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- WEEK 2 -->
-        <!-- DAY 6 -->
-        <div class="task-card priority-critical" id="day-6">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 6 • SUNDAY • WEEK 2</span>
-            <span class="badge badge-critical">CRITICAL</span>
-          </div>
-          <div class="task-title" data-en="Day 6: Mawasi Perimeter & Anti-Intrusion Night Audit" data-ar="اليوم 6: فحص السياج الخارجي وبوابات مخيم المواصي">Day 6: Mawasi Perimeter & Anti-Intrusion Night Audit</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Camp Manager & Head Guard: Access to perimeter boundary, gates, and visitor logs." data-ar="مدير المخيم ومسؤول الحراسة: فتح محيط المخيم الخارجي وسجلات الزوار.">Camp Manager & Head Guard: Access to perimeter boundary, gates, and visitor logs.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Inspect fence integrity, entry locks, solar floodlights, and enforce ZERO WEAPONS POLICY." data-ar="فحص متانة الأسوار، الكشافات الليلية، والتأكيد الصارم على منع أي سلاح بالبوابات.">Inspect fence integrity, entry locks, solar floodlights, and enforce ZERO WEAPONS POLICY.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Guard force shift: Reinforce strict visitor vetting and total lockdown after 17:30." data-ar="طاقم الحراسة: التشديد على حظر دخول أي غريب أو زائر بعد غروب الشمس.">Guard force shift: Reinforce strict visitor vetting and total lockdown after 17:30.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 7 -->
-        <div class="task-card priority-critical" id="day-7">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 7 • MONDAY • WEEK 2</span>
-            <span class="badge badge-critical">CRITICAL</span>
-          </div>
-          <div class="task-title" data-en="Day 7: Children Tent Electrical & Structural Hazard Check" data-ar="اليوم 7: فحص تمديدات خيام الأطفال وخطر الصعق الكهربائي">Day 7: Children Tent Electrical & Structural Hazard Check</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Head Caregiver: Access to residential tents and caravans housing orphaned children." data-ar="المشرفة المقيمة: مرافقة كاملة لممرات وخيام إيواء الأطفال الأيتام.">Head Caregiver: Access to residential tents and caravans housing orphaned children.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Check solar invertor lines, isolate exposed wiring, and clear tent guy ropes in paths." data-ar="عزل الأسلاك الكهربائية المكشوفة لحماية الأطفال، وإزالة حبال التعثر من الممرات.">Check solar invertor lines, isolate exposed wiring, and clear tent guy ropes in paths.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Foster mothers & caregivers: Listen to night safety concerns and cold/rain leaks." data-ar="الأمهات البديلات: الاستماع لملاحظاتهن حول أمان الخيام والضوضاء الليلية.">Foster mothers & caregivers: Listen to night safety concerns and cold/rain leaks.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 8 -->
-        <div class="task-card priority-critical" id="day-8">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 8 • TUESDAY • WEEK 2</span>
-            <span class="badge badge-critical">CRITICAL</span>
-          </div>
-          <div class="task-title" data-en="Day 8: Fire Extinguishers & Fuel/LPG Storage Audit" data-ar="اليوم 8: فحص طفايات الحريق وأسطوانات الغاز والمطبخ">Day 8: Fire Extinguishers & Fuel/LPG Storage Audit</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Logistics & Camp Cook: Access to kitchen LPG cylinders, burners, and safety gear." data-ar="مسؤول اللوجستيات وطباخ المخيم: فحص أسطوانات الغاز ومعدات الإطفاء.">Logistics & Camp Cook: Access to kitchen LPG cylinders, burners, and safety gear.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Inspect Dry Powder extinguishers, check pressure gauges, test wet sand fire buckets." data-ar="فحص صلاحية وضغط طفايات البودرة وتوفر براميل الرمل الرطب لإخماد حرائق الشوادر.">Inspect Dry Powder extinguishers, check pressure gauges, test wet sand fire buckets.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Kitchen staff: Enforce child exclusion perimeter around cooking and boiling areas." data-ar="طاقم المطبخ: منع اقتراب الأطفال نهائياً من منطقة الطهي والأسطوانات.">Kitchen staff: Enforce child exclusion perimeter around cooking and boiling areas.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 9 -->
-        <div class="task-card" id="day-9">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 9 • WEDNESDAY • WEEK 2</span>
-            <span class="badge badge-standard">STANDARD</span>
-          </div>
-          <div class="task-title" data-en="Day 9: Fleet Vehicle & Evacuation Medical Kits" data-ar="اليوم 9: تدقيق مركبات الحركة وحقائب الإسعاف والطوارئ">Day 9: Fleet Vehicle & Evacuation Medical Kits</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Fleet Supervisor: Vehicle maintenance logs, driver licenses, and in-car safety kits." data-ar="مسؤول الأسطول: سجلات صيانة السيارات ورخص السائقين وحقائب الطوارئ داخلها.">Fleet Supervisor: Vehicle maintenance logs, driver licenses, and in-car safety kits.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Audit spare tires (sand terrain condition), tow ropes, first aid kits, and car chargers." data-ar="فحص جهوزية السيارات للمسير في رمال المواصي، أحزمة السحب، وحقائب الإسعاف.">Audit spare tires (sand terrain condition), tow ropes, first aid kits, and car chargers.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Drivers: Brief on designated emergency transit corridors to Khan Yunis field clinics." data-ar="السائقين: مراجعة خطوط الإخلاء الطبي المعتمدة لأقرب مستشفى ميداني فعال.">Drivers: Brief on designated emergency transit corridors to Khan Yunis field clinics.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 10 -->
-        <div class="task-card priority-warning" id="day-10">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 10 • THURSDAY • WEEK 2</span>
-            <span class="badge badge-warning">WARNING</span>
-          </div>
-          <div class="task-title" data-en="Day 10: Findings Matrix & Urgent Safety Procurement" data-ar="اليوم 10: مصفوفة الثغرات وطلبات الشراء والصيانة العاجلة">Day 10: Findings Matrix & Urgent Safety Procurement</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Procurement / Logistics: Priority price quotes for urgent safety equipment." data-ar="المشتريات / اللوجستيات: تسريع عروض الأسعار للإصلاحات الأمنية ومعدات السلامة.">Procurement / Logistics: Priority price quotes for urgent safety equipment.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Consolidate Security Findings Matrix; issue PRs for missing extinguishers and solar lights." data-ar="تفريغ مصفوفة الثغرات وإصدار طلبات شراء رسمية لطفايات إضافية وكشافات طاقة شمسية.">Consolidate Security Findings Matrix; issue PRs for missing extinguishers and solar lights.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Area Director: Validate emergency purchase requisitions and repair budgets." data-ar="مدير المنطقة: اعتماد موازنة المشتريات العاجلة لسد الثغرات الميدانية.">Area Director: Validate emergency purchase requisitions and repair budgets.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- WEEK 3 -->
-        <!-- DAY 11 -->
-        <div class="task-card" id="day-11">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 11 • SUNDAY • WEEK 3</span>
-            <span class="badge badge-standard">STANDARD</span>
-          </div>
-          <div class="task-title" data-en="Day 11: Movement Clearance & Check-in Automation" data-ar="اليوم 11: أتمتة تصاريح الحركة ونظام التحقق الرقمي">Day 11: Movement Clearance & Check-in Automation</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Program Managers: Weekly operational movement schedule for child care staff." data-ar="مدراء المشاريع: جدول التحركات الأسبوعية لبرامج رعاية الأطفال الميدانية.">Program Managers: Weekly operational movement schedule for child care staff.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Deploy standardized digital/paper Movement Clearance Form with check-in checkpoints." data-ar="تفعيل نموذج تصريح الحركة اليومي وتثبيت نقاط الإبلاغ الإلزامية عند التحرك والوصول.">Deploy standardized digital/paper Movement Clearance Form with check-in checkpoints.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Field teams & drivers: Train on mandatory check-in intervals (departure, site, return)." data-ar="الفرق الميدانية والسائقين: التوجيه ببروتوكول رسائل التحقق (تحرك، في الموقع، عودة).">Field teams & drivers: Train on mandatory check-in intervals (departure, site, return).</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 12 -->
-        <div class="task-card priority-critical" id="day-12">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 12 • MONDAY • WEEK 3</span>
-            <span class="badge badge-critical">CRITICAL</span>
-          </div>
-          <div class="task-title" data-en="Day 12: Emergency Cascading Phone Tree Restructure" data-ar="اليوم 12: إعادة هيكلة وتحديث شجرة الاتصال للطوارئ">Day 12: Emergency Cascading Phone Tree Restructure</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="HR & Mawasi Site Supervisor: 100% updated mobile numbers and alternate SIMs." data-ar="الموارد البشرية والمشرف: أحدث أرقام هواتف الموظفين والمربيات وبدائل الاتصال.">HR & Mawasi Site Supervisor: 100% updated mobile numbers and alternate SIMs.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Structure hierarchical Phone Tree: Security Officer -> Site Leads -> Caregivers & Guards." data-ar="هيكلة شجرة الاتصال الهرمية السريعة لضمان تعميم أي إنذار في أقل من 5 دقائق.">Structure hierarchical Phone Tree: Security Officer -> Site Leads -> Caregivers & Guards.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Focal tree leads: Clarify responsibility to relay emergency alert and report confirmation." data-ar="نقاط الاتصال المحورية: توضيح دورهم في تمرير البلاغ والتأكد من استلام الجميع.">Focal tree leads: Clarify responsibility to relay emergency alert and report confirmation.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 13 -->
-        <div class="task-card" id="day-13">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 13 • TUESDAY • WEEK 3</span>
-            <span class="badge badge-standard">STANDARD</span>
-          </div>
-          <div class="task-title" data-en="Day 13: Mawasi Transit Corridors & Medical Evac Mapping" data-ar="اليوم 13: مسارات التحرك الآمنة وخريطة النقاط الطبية">Day 13: Mawasi Transit Corridors & Medical Evac Mapping</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="INSO / UN GIS maps: Road condition and open access axes across Khan Yunis & coastal road." data-ar="خرائط INSO: أحدث التحديثات حول الطرق والمحاور المفتوحة في خانيونس والشاطئ.">INSO / UN GIS maps: Road condition and open access axes across Khan Yunis & coastal road.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Map primary and alternate routes from Mawasi camp to Red Cross / UK-Med field clinics." data-ar="رسم المسارات الآمنة لنقل الطوارئ الطبية من المخيم إلى المستشفيات الميدانية.">Map primary and alternate routes from Mawasi camp to Red Cross / UK-Med field clinics.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Logistics & drivers: Distribute laminated pocket transit maps with medical points." data-ar="اللوجستيات والسائقين: توزيع خرائط طرق مصغرة ومغلفة مع أرقام الطوارئ الطبية.">Logistics & drivers: Distribute laminated pocket transit maps with medical points.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 14 -->
-        <div class="task-card priority-critical" id="day-14">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 14 • WEDNESDAY • WEEK 3</span>
-            <span class="badge badge-critical">CRITICAL</span>
-          </div>
-          <div class="task-title" data-en="Day 14: Telecom Blackout SOP & Non-Cellular Contingency" data-ar="اليوم 14: بروتوكول انقطاع الاتصالات والإنترنت التام">Day 14: Telecom Blackout SOP & Non-Cellular Contingency</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Mawasi Site Supervisor: Inventory of whistles, horns, and solar flashlights." data-ar="مشرف الموقع: جرد وسائل التنبيه اليدوية (صافرات، أبواق يدوية، كشافات).">Mawasi Site Supervisor: Inventory of whistles, horns, and solar flashlights.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Issue written Blackout SOP: freeze inter-governorate moves, set fixed-window check-ins." data-ar="إصدار بروتوكول انقطاع الاتصالات: تجميد الحركة وتحديد أوقات الفحص الميداني الثابتة.">Issue written Blackout SOP: freeze inter-governorate moves, set fixed-window check-ins.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Area Director: Approve designated offline liaison runner protocol for urgent emergencies." data-ar="إدارة المنطقة: اعتماد بروتوكول المراسل اليدوي ونقاط الالتقاء البديلة للطوارئ.">Area Director: Approve designated offline liaison runner protocol for urgent emergencies.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 15 -->
-        <div class="task-card priority-warning" id="day-15">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 15 • THURSDAY • WEEK 3</span>
-            <span class="badge badge-warning">WARNING</span>
-          </div>
-          <div class="task-title" data-en="Day 15: Phone Tree Silent Cascade Test (Dry-Run)" data-ar="اليوم 15: اختبار تجريبي صامت لشجرة الاتصال">Day 15: Phone Tree Silent Cascade Test (Dry-Run)</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Area Director: Approval to initiate cascading drill message at 10:00." data-ar="مدير المنطقة: الموافقة على إطلاق رسالة اختبار شجرة الاتصال الساعة 10:00.">Area Director: Approval to initiate cascading drill message at 10:00.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Dispatch test alert: 'DRILL - CONFIRM RECEIPT'. Track total minutes and dead nodes." data-ar="إطلاق رسالة: 'اختبار أمني تجريبي - يرجى تأكيد الاستلام'. وقياس زمن الاستجابة.">Dispatch test alert: 'DRILL - CONFIRM RECEIPT'. Track total minutes and dead nodes.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Staff failing to respond within 15 min: Troubleshoot reception or update SIM numbers." data-ar="الموظفين الذين تعثر وصول الرسالة إليهم: معرفة الخلل وتحديث الأرقام البديلة فوراً.">Staff failing to respond within 15 min: Troubleshoot reception or update SIM numbers.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- WEEK 4 -->
-        <!-- DAY 16 -->
-        <div class="task-card" id="day-16">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 16 • SUNDAY • WEEK 4</span>
-            <span class="badge badge-standard">STANDARD</span>
-          </div>
-          <div class="task-title" data-en="Day 16: Caregiver Security & Trauma-Informed Briefing" data-ar="اليوم 16: ورشة توعية أمنية للأمهات البديلات والمربيات">Day 16: Caregiver Security & Trauma-Informed Briefing</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Mawasi Camp Supervisor: 1-hour relief coverage for foster mothers in 2 batches." data-ar="مشرف المخيم: تفريغ الأمهات البديلات على دفعتين لحضور ورشة التوعية.">Mawasi Camp Supervisor: 1-hour relief coverage for foster mothers in 2 batches.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Conduct safety briefing: calm shelter-in-place, staying away from outer tent canvas." data-ar="تدريب عملي: التصرف الهادئ عند الانفجارات القريبة والابتعاد عن أطراف الخيام.">Conduct safety briefing: calm shelter-in-place, staying away from outer tent canvas.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Foster mothers: Equip them with practical calm actions to prevent child panic." data-ar="المربيات والأمهات: تقديم نصائح عملية لتهدئة روع الأطفال ومنع حالات الفزع الجماعي.">Foster mothers: Equip them with practical calm actions to prevent child panic.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 17 -->
-        <div class="task-card priority-critical" id="day-17">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 17 • MONDAY • WEEK 4</span>
-            <span class="badge badge-critical">CRITICAL</span>
-          </div>
-          <div class="task-title" data-en="Day 17: Practical Fire Extinguisher Drill in Camp" data-ar="اليوم 17: تمرين عملي لمحاكاة إطفاء حريق في المخيم">Day 17: Practical Fire Extinguisher Drill in Camp</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Camp Lead & Safety Wardens: Staging area isolated from children's sleeping quarters." data-ar="مدير المخيم: تخصيص منطقة تدريب آمنة بعيداً عن خيام الأطفال لعدم فزعهم.">Camp Lead & Safety Wardens: Staging area isolated from children's sleeping quarters.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Run simulation: Whistle alarm -> sand bucket toss -> extinguisher discharge (PASS rule)." data-ar="تنفيذ المحاكاة: إطلاق الإنذار، جلب براميل الرمل، وتطبيق قاعدة PASS بالطفايات.">Run simulation: Whistle alarm -> sand bucket toss -> extinguisher discharge (PASS rule).</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Guards and camp crew: Debrief on reaction time and nozzle positioning against wind." data-ar="فريق الحراسة والعمال: تقييم زمن الاستجابة وتصحيح طريقة توجيه الطفايات.">Guards and camp crew: Debrief on reaction time and nozzle positioning against wind.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 18 -->
-        <div class="task-card" id="day-18">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 18 • TUESDAY • WEEK 4</span>
-            <span class="badge badge-standard">STANDARD</span>
-          </div>
-          <div class="task-title" data-en="Day 18: Child-Friendly Soft Shelter-in-Place Drill" data-ar="اليوم 18: محاكاة تمترس هادئة وصديقة للأطفال الأيتام">Day 18: Child-Friendly Soft Shelter-in-Place Drill</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Child Protection Lead & Mental Health (MHPSS) Team: Supervise interactive activity." data-ar="أخصائي حماية الطفل والدعم النفسي: الإشراف المباشر على النشاط التفاعلي.">Child Protection Lead & Mental Health (MHPSS) Team: Supervise interactive activity.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Guide children calmly into central reinforced communal tent without triggering alarm." data-ar="تنظيم نشاط هادئ لتوجيه الأطفال نحو الخيمة الأكثر تحصيناً دون إثارة أي هلع.">Guide children calmly into central reinforced communal tent without triggering alarm.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="MHPSS specialists: Review child reactions and address any triggered anxiety signs." data-ar="الأخصائيين النفسيين: تقييم سلوك الأطفال والتأكد من عدم وجود أي أثر نفسي سلبي.">MHPSS specialists: Review child reactions and address any triggered anxiety signs.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 19 -->
-        <div class="task-card priority-warning" id="day-19">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 19 • WEDNESDAY • WEEK 4</span>
-            <span class="badge badge-warning">WARNING</span>
-          </div>
-          <div class="task-title" data-en="Day 19: Month 1 Comprehensive Security Review Report" data-ar="اليوم 19: صياغة التقرير الأمني التقييمي الأول للشهر الأول">Day 19: Month 1 Comprehensive Security Review Report</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Logistics, Camp Manager, and Maintenance: Final status of resolved audit items." data-ar="اللوجستيات ومسؤولي الصيانة: كشف نهائي بما تم إنجازه وإصلاحه من الثغرات.">Logistics, Camp Manager, and Maintenance: Final status of resolved audit items.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Draft First 30-Day Comprehensive Security Evaluation covering Mawasi mitigations." data-ar="كتابة تقرير التقييم الأمني الشامل للشهر الأول وتوضيح التحصينات والتوصيات المتبقية.">Draft First 30-Day Comprehensive Security Evaluation covering Mawasi mitigations.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Area Director: Present executive summary and risk reduction roadmap." data-ar="مدير المنطقة: استعراض ملخص التقرير والتقدم المحرز في رفع الجاهزية.">Area Director: Present executive summary and risk reduction roadmap.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DAY 20 -->
-        <div class="task-card" id="day-20">
-          <div class="task-top">
-            <span class="badge badge-day">DAY 20 • THURSDAY • WEEK 4</span>
-            <span class="badge badge-standard">STANDARD</span>
-          </div>
-          <div class="task-title" data-en="Day 20: 90-Day Operational Plan & SSP Ratification" data-ar="اليوم 20: إقرار خطة العمل للأشهر الثلاثة القادمة (90 يوماً)">Day 20: 90-Day Operational Plan & SSP Ratification</div>
-          <div class="task-grid-info">
-            <div>
-              <div class="grid-cell-label" data-en="FROM WHOM TO REQUEST" data-ar="من مين تطلب">FROM WHOM TO REQUEST</div>
-              <div class="grid-cell-val" data-en="Senior Leadership Team: Final conference to approve future safety roadmap." data-ar="فريق القيادة العليا: جلسة اعتماد مخرجات الشهر وخطة الربع القادم.">Senior Leadership Team: Final conference to approve future safety roadmap.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="ACTION REQUIRED" data-ar="شو تعمل بالضبط">ACTION REQUIRED</div>
-              <div class="grid-cell-val" data-en="Ratify Mawasi Camp Site Security Plan (SSP) and schedule monthly routine inspection calendar." data-ar="اعتماد خطة أمن الموقع (SSP) لمخيم المواصي، وجدولة الفحص الدوري الشهري.">Ratify Mawasi Camp Site Security Plan (SSP) and schedule monthly routine inspection calendar.</div>
-            </div>
-            <div>
-              <div class="grid-cell-label" data-en="WHOM TO CONTACT / DEBRIEF" data-ar="مين تكلّم وتنسق معه">WHOM TO CONTACT / DEBRIEF</div>
-              <div class="grid-cell-val" data-en="Entire SOS Operations & Programs family: Transition officially into stable operations." data-ar="كافة الزملاء في العمليات والبرامج: شكرهم على التعاون والانتقال للوضع التشغيلي المستقر.">Entire SOS Operations & Programs family: Transition officially into stable operations.</div>
-            </div>
-          </div>
-        </div>
-
+    <!-- تفاصيل اليوم المختار -->
+    <div class="detail-card">
+      <div class="detail-header">
+        <span class="detail-day-name" id="det-title">اليوم 1 • الأحد 15 نوفمبر 2026</span>
       </div>
-
-      <!-- TAB 2: DOSSIER DIRECTORY -->
-      <div id="tab-folders" class="tab-content">
-        <div class="section-title"><span id="lbl-dir-hdr">Cloud & Offline Directory Structure (SOS_Security_2026)</span></div>
-        <div class="task-card">
-          <div class="task-title">📁 01_SOPs_and_Policies/</div>
-          <div class="grid-cell-val">↳ SOS_Palestine_Country_Security_Plan_2026.pdf<br>↳ Child_Safeguarding_Security_Annex.pdf<br>↳ Blackout_Communication_SOP_Gaza.docx<br>↳ Fire_Safety_and_Evacuation_Rules_Tents.pdf</div>
+      <div class="detail-box">
+        <div>
+          <div class="detail-row-title">المهمة الرئيسية:</div>
+          <div class="detail-row-text" id="det-task">المباشرة الإدارية وتفعيل الصلاحيات وتدقيق سياسة حماية وصون الطفل.</div>
         </div>
-        <div class="task-card">
-          <div class="task-title">📁 02_Mawasi_Camp_Security/</div>
-          <div class="grid-cell-val">↳ Mawasi_Camp_Site_Security_Plan_SSP.docx<br>↳ Camp_Perimeter_Lighting_Layout_Map.pdf<br>↳ Caregiver_Night_Shift_Guard_Matrix.xlsx<br>↳ Emergency_Safe_Tent_Specs.pdf</div>
+        <div>
+          <div class="detail-row-title">من مين تطلب:</div>
+          <div class="detail-row-text" id="det-req">الموارد البشرية (البطاقة، العقد، الدليل) وتكنولوجيا المعلومات (الإيميل، الهاتف، الشريحة).</div>
         </div>
-        <div class="task-card">
-          <div class="task-title">📁 03_Audits_and_Trackers/</div>
-          <div class="grid-cell-val">↳ Master_Security_Findings_Tracker.xlsx<br>↳ Fire_Extinguisher_Fleet_Log_2026.xlsx<br>↳ Mawasi_Camp_Daily_Inspection_Form.pdf</div>
+        <div>
+          <div class="detail-row-title">شو تعمل بالضبط:</div>
+          <div class="detail-row-text" id="det-act">تهيئة مجلدات العمل، تفعيل الحسابات، ودراسة سياسة حماية وصون الطفل التابعة للمنظمة.</div>
         </div>
-        <div class="task-card">
-          <div class="task-title">📁 04_Movement_and_GIS/</div>
-          <div class="grid-cell-val">↳ Daily_Movement_Clearance_Register.xlsx<br>↳ Khan_Yunis_Mawasi_Hospital_Corridors.kml<br>↳ Checkin_Log_Radio_Operator_Template.xlsx</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title">📁 05_Emergency_Directory/</div>
-          <div class="grid-cell-val">↳ Master_Emergency_Cascading_Phone_Tree.pdf<br>↳ INSO_UNDSS_Partner_Focal_Points.xlsx<br>↳ Red_Cross_Field_Clinics_Hotlines.docx</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title">📁 06_Reports_and_90Day_Plan/</div>
-          <div class="grid-cell-val">↳ Month1_Comprehensive_Security_Review.docx<br>↳ Next_90_Days_Tactical_Security_Roadmap.docx<br>↳ Drill_Evaluation_Records_Mawasi.xlsx</div>
+        <div>
+          <div class="detail-row-title">مين تكلّم وتنسق معه:</div>
+          <div class="detail-row-text" id="det-talk">المدير المباشر (مدير المنطقة) لتحديد أولويات مخيم المواصي الفورية.</div>
         </div>
       </div>
-
-      <!-- TAB 3: TACTICAL PROTOCOLS -->
-      <div id="tab-sop" class="tab-content">
-        <div class="section-title"><span id="lbl-sop-hdr">Mawasi Tactical Standard Operating Procedures</span></div>
-        <div class="task-card priority-critical">
-          <div class="task-title">🔥 Mawasi Tent Fire Contingency Protocol</div>
-          <div class="grid-cell-val">
-            1. Sound whistle or emergency horn immediately.<br>
-            2. If front entrance blocked, cut tent fabric on opposing side with utility knife.<br>
-            3. Evacuate children upwind away from heavy plastic smoke.<br>
-            4. Deploy Dry Powder extinguishers (PASS rule) and wet sand barrels on base of flame.
-          </div>
-        </div>
-        <div class="task-card priority-warning">
-          <div class="task-title">🌙 Anti-Intrusion & Night Camp Lockdown Protocol</div>
-          <div class="grid-cell-val">
-            1. Total perimeter lockdown at 17:30 daily.<br>
-            2. Verify solar floodlights illuminated around girls' and infants' quarters.<br>
-            3. Guards execute internal patrols every 45 minutes.<br>
-            4. ZERO WEAPONS POLICY strictly enforced at gate without exception.
-          </div>
-        </div>
-        <div class="task-card">
-          <div class="task-title">📡 Complete Telecom Blackout Action Plan</div>
-          <div class="grid-cell-val">
-            1. Freeze all inter-governorate road movements immediately.<br>
-            2. Stationary check-in window times: 09:00 and 15:00 at camp gate.<br>
-            3. Rely on laminated paper emergency cards for designated medical points in Mawasi.
-          </div>
-        </div>
-      </div>
-    </main>
-
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-      <button class="nav-btn active" onclick="showTab('tab-plan', this)"><span>📅</span><span id="nav-lbl-plan">PLAN (20D)</span></button>
-      <button class="nav-btn" onclick="showTab('tab-folders', this)"><span>📁</span><span id="nav-lbl-folders">FOLDERS</span></button>
-      <button class="nav-btn" onclick="showTab('tab-sop', this)"><span>🛡️</span><span id="nav-lbl-sop">SOPs</span></button>
-    </nav>
+    </div>
   </div>
 
-  <!-- Three.js 3D Interactive Tactical Engine -->
   <script>
-    let scene, camera, renderer, terrainMesh, pointsGroup;
-    let isDragging = false;
-    let prevMousePos = { x: 0, y: 0 };
-    let overlayVisible = true;
-
-    function init3D() {
-      const container = document.getElementById("canvas-container");
-      scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x080b10, 0.025);
-
-      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(0, 22, 28);
-      camera.lookAt(0, 0, 0);
-
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      container.appendChild(renderer.domElement);
-
-      // Create 3D Wireframe Terrain Strip (Simulating Gaza Strip & Coastal Dunes)
-      const geometry = new THREE.PlaneGeometry(28, 48, 36, 60);
-      const pos = geometry.attributes.position;
-      for (let i = 0; i < pos.count; i++) {
-        const x = pos.getX(i);
-        const y = pos.getY(i);
-        // Elevate coastal dunes and inland ridges
-        const z = Math.sin(x * 0.45) * Math.cos(y * 0.25) * 1.6 + Math.sin(x * 0.8) * 0.6;
-        pos.setZ(i, z);
+    const TASKS = {
+      1: {
+        date: "اليوم 1 • الأحد 15 نوفمبر 2026",
+        task: "المباشرة الإدارية وتفعيل الصلاحيات وتدقيق سياسة حماية وصون الطفل.",
+        req: "الموارد البشرية (البطاقة، العقد، الدليل) وتكنولوجيا المعلومات (الإيميل، الهاتف، الشريحة).",
+        act: "تهيئة مجلدات العمل، تفعيل الحسابات، ودراسة سياسة حماية وصون الطفل التابعة للمنظمة.",
+        talk: "المدير المباشر (مدير المنطقة) لتحديد أولويات مخيم المواصي الفورية."
+      },
+      2: {
+        date: "اليوم 2 • الإثنين 16 نوفمبر 2026",
+        task: "حصر ملفات مخيم المواصي وقوائم الأطفال الأيتام وغير المصحوبين.",
+        req: "إدارة البرامج (مخطط مخيم المواصي، كشف الأطفال الأيتام، جدول المربيات الليلي).",
+        act: "تدقيق أرقام الطوارئ ومطابقة خيام مبيت الأطفال الأيتام وغير المصحوبين UASC بالمواصي.",
+        talk: "مسؤول إدارة الحالة وحماية الطفل لفهم النزاعات العائلية ومخاطر استرداد الأطفال."
+      },
+      3: {
+        date: "اليوم 3 • الثلاثاء 17 نوفمبر 2026",
+        task: "تأسيس سجل الحوادث الميداني والاندماج في فريق الأزمات.",
+        req: "مدير العمليات: تفويض الانضمام لقنوات فريق إدارة الأزمات والقيادة (SRT / SLT).",
+        act: "بناء سجل الحوادث الميداني الموحد لتوثيق أي خرق أو تهديد لمخيم المواصي.",
+        talk: "فريق الاستجابة للأزمات (SRT): الاتفاق على ساعة الإحاطة الصباحية (08:30 صباحاً)."
+      },
+      4: {
+        date: "اليوم 4 • الأربعاء 18 نوفمبر 2026",
+        task: "التشبيك الأمني الخارجي (INSO، UNDSS والمنظمات القريبة).",
+        req: "المدير المباشر: خطاب تفويض لتفعيل العضوية في شبكات التنسيق الإنساني.",
+        act: "تفعيل التنبيهات مع INSO وUNDSS لمتابعة تطورات قطاع خانيونس والمواصي لحظياً.",
+        talk: "مسؤولي الأمن بالمنظمات والمستشفيات الميدانية المجاورة بالمواصي لتبادل التحديثات."
+      },
+      5: {
+        date: "اليوم 5 • الخميس 19 نوفمبر 2026",
+        task: "تقرير نهاية الأسبوع الأول وتجهيز قوائم التدقيق الميداني.",
+        req: "اللوجستيات: تأمين سيارة ومعدات الفحص الميداني لجولات الأسبوع الثاني.",
+        act: "إعداد قائمة فحص السلامة لمخيم أطفال المواصي (الأسوار، الطاقة، الحرائق، الخيام).",
+        talk: "مدير مخيم المواصي لتأكيد موعد الجولة التفتيشية الشاملة مع الحراس والمربيات."
+      },
+      6: {
+        date: "اليوم 6 • الأحد 22 نوفمبر 2026",
+        task: "فحص السياج الخارجي وبوابات مخيم المواصي ومنع السلاح.",
+        req: "مدير المخيم ومسؤول الحراسة: فتح محيط المخيم الخارجي وسجلات الزوار.",
+        act: "فحص متانة الأسوار، الكشافات الليلية، والتأكيد الصارم على منع أي سلاح بالبوابات.",
+        talk: "طاقم الحراسة: التشديد على حظر دخول أي غريب أو زائر بعد غروب الشمس."
+      },
+      7: {
+        date: "اليوم 7 • الإثنين 23 نوفمبر 2026",
+        task: "فحص تمديدات خيام الأطفال وخطر الصعق والحرائق.",
+        req: "المشرفة المقيمة: مرافقة كاملة لممرات وخيام إيواء الأطفال الأيتام.",
+        act: "عزل الأسلاك الكهربائية المكشوفة لحماية الأطفال، وإزالة حبال التعثر من الممرات.",
+        talk: "الأمهات البديلات: الاستماع لملاحظاتهن حول أمان الخيام والضوضاء الليلية."
+      },
+      8: {
+        date: "اليوم 8 • الثلاثاء 24 نوفمبر 2026",
+        task: "فحص طفايات الحريق وأسطوانات الغاز والمطبخ بالمخيم.",
+        req: "مسؤول اللوجستيات وطباخ المخيم: فحص أسطوانات الغاز ومعدات الإطفاء.",
+        act: "فحص صلاحية وضغط طفايات البودرة وتوفر براميل الرمل الرطب لإخماد حرائق الشوادر.",
+        talk: "طاقم المطبخ: منع اقتراب الأطفال نهائياً من منطقة الطهي والأسطوانات."
+      },
+      9: {
+        date: "اليوم 9 • الأربعاء 25 نوفمبر 2026",
+        task: "تدقيق مركبات الحركة وحقائب الإسعاف والطوارئ.",
+        req: "مسؤول الأسطول: سجلات صيانة السيارات ورخص السائقين وحقائب الطوارئ داخلها.",
+        act: "فحص جهوزية السيارات للمسير في رمال المواصي، أحزمة السحب، وحقائب الإسعاف.",
+        talk: "السائقين: مراجعة خطوط الإخلاء الطبي المعتمدة لأقرب مستشفى ميداني فعال."
+      },
+      10: {
+        date: "اليوم 10 • الخميس 26 نوفمبر 2026",
+        task: "مصفوفة الثغرات وطلبات الشراء والصيانة العاجلة.",
+        req: "المشتريات / اللوجستيات: تسريع عروض الأسعار للإصلاحات الأمنية ومعدات السلامة.",
+        act: "تفريغ مصفوفة الثغرات وإصدار طلبات شراء رسمية لطفايات إضافية وكشافات طاقة شمسية.",
+        talk: "مدير المنطقة: اعتماد موازنة المشتريات العاجلة لسد الثغرات الميدانية."
+      },
+      11: {
+        date: "اليوم 11 • الأحد 29 نوفمبر 2026",
+        task: "أتمتة تصاريح الحركة ونظام التحقق الرقمي.",
+        req: "مدراء المشاريع: جدول التحركات الأسبوعية لبرامج رعاية الأطفال الميدانية.",
+        act: "تفعيل نموذج تصريح الحركة اليومي وتثبيت نقاط الإبلاغ الإلزامية عند التحرك والوصول.",
+        talk: "الفرق الميدانية والسائقين: التوجيه ببروتوكول رسائل التحقق (تحرك، في الموقع، عودة)."
+      },
+      12: {
+        date: "اليوم 12 • الإثنين 30 نوفمبر 2026",
+        task: "إعادة هيكلة وتحديث شجرة الاتصال للطوارئ.",
+        req: "الموارد البشرية والمشرف: أحدث أرقام هواتف الموظفين والمربيات وبدائل الاتصال.",
+        act: "هيكلة شجرة الاتصال الهرمية السريعة لضمان تعميم أي إنذار في أقل من 5 دقائق.",
+        talk: "نقاط الاتصال المحورية: توضيح دورهم في تمرير البلاغ والتأكد من استلام الجميع."
       }
-      geometry.computeVertexNormals();
+    };
 
-      const wireMaterial = new THREE.MeshBasicMaterial({
-        color: 0x1b3b22,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.65
-      });
+    function showTask(dayNum) {
+      const data = TASKS[dayNum];
+      if (!data) return;
 
-      terrainMesh = new THREE.Mesh(geometry, wireMaterial);
-      terrainMesh.rotation.x = -Math.PI / 2.3;
-      terrainMesh.position.y = -2;
-      scene.add(terrainMesh);
+      document.querySelectorAll(".calendar-table td").forEach(td => td.classList.remove("active-day"));
+      event.currentTarget.classList.add("active-day");
 
-      // Tactical Beacon Points (Mawasi Camp, Khan Yunis, Deir al Balah)
-      pointsGroup = new THREE.Group();
-      
-      const beaconCoords = [
-        { name: "SOS Mawasi Camp", x: -3.5, y: 1.2, z: 2.5, color: 0x39ff14 },
-        { name: "Khan Yunis HQ", x: -0.5, y: 1.5, z: 0.5, color: 0xe8c84a },
-        { name: "Deir al-Balah", x: 1.5, y: 1.4, z: -4.5, color: 0x39ff14 },
-        { name: "Gaza Office", x: 2.2, y: 1.3, z: -10.5, color: 0x7d8590 }
-      ];
-
-      beaconCoords.forEach(b => {
-        const pGeo = new THREE.SphereGeometry(0.35, 12, 12);
-        const pMat = new THREE.MeshBasicMaterial({ color: b.color });
-        const sphere = new THREE.Mesh(pGeo, pMat);
-        sphere.position.set(b.x, b.y, b.z);
-        pointsGroup.add(sphere);
-
-        // Ring beacon
-        const rGeo = new THREE.RingGeometry(0.5, 0.7, 16);
-        const rMat = new THREE.MeshBasicMaterial({ color: b.color, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
-        const ring = new THREE.Mesh(rGeo, rMat);
-        ring.rotation.x = Math.PI / 2;
-        ring.position.set(b.x, b.y - 0.2, b.z);
-        pointsGroup.add(ring);
-      });
-
-      scene.add(pointsGroup);
-
-      // Touch / Mouse Rotation Handlers
-      window.addEventListener("mousedown", (e) => {
-        isDragging = true;
-        prevMousePos = { x: e.clientX, y: e.clientY };
-      });
-
-      window.addEventListener("mousemove", (e) => {
-        if (!isDragging || !terrainMesh) return;
-        const deltaX = e.clientX - prevMousePos.x;
-        const deltaY = e.clientY - prevMousePos.y;
-        terrainMesh.rotation.z += deltaX * 0.005;
-        terrainMesh.rotation.x += deltaY * 0.005;
-        pointsGroup.rotation.y += deltaX * 0.005;
-        prevMousePos = { x: e.clientX, y: e.clientY };
-      });
-
-      window.addEventListener("mouseup", () => isDragging = false);
-
-      // Mobile Touch Handlers
-      window.addEventListener("touchstart", (e) => {
-        if (e.touches.length === 1) {
-          isDragging = true;
-          prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        }
-      }, { passive: true });
-
-      window.addEventListener("touchmove", (e) => {
-        if (!isDragging || e.touches.length !== 1 || !terrainMesh) return;
-        const deltaX = e.touches[0].clientX - prevMousePos.x;
-        const deltaY = e.touches[0].clientY - prevMousePos.y;
-        terrainMesh.rotation.z += deltaX * 0.006;
-        terrainMesh.rotation.x += deltaY * 0.006;
-        pointsGroup.rotation.y += deltaX * 0.006;
-        prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      }, { passive: true });
-
-      window.addEventListener("touchend", () => isDragging = false);
-
-      window.addEventListener("resize", onWindowResize);
-
-      animate();
+      document.getElementById("det-title").innerText = data.date;
+      document.getElementById("det-task").innerText = data.task;
+      document.getElementById("det-req").innerText = data.req;
+      document.getElementById("det-act").innerText = data.act;
+      document.getElementById("det-talk").innerText = data.talk;
     }
-
-    function animate() {
-      requestAnimationFrame(animate);
-      if (pointsGroup) {
-        pointsGroup.children.forEach((c, idx) => {
-          if (c.geometry.type === "RingGeometry") {
-            c.scale.x = 1 + Math.sin(Date.now() * 0.003 + idx) * 0.25;
-            c.scale.y = 1 + Math.sin(Date.now() * 0.003 + idx) * 0.25;
-          }
-        });
-      }
-      renderer.render(scene, camera);
-    }
-
-    function onWindowResize() {
-      if (!camera || !renderer) return;
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    function resetCamera() {
-      if (!camera || !terrainMesh) return;
-      camera.position.set(0, 22, 28);
-      camera.lookAt(0, 0, 0);
-      terrainMesh.rotation.set(-Math.PI / 2.3, 0, 0);
-      pointsGroup.rotation.set(0, 0, 0);
-    }
-
-    function toggle3DOverlay() {
-      const app = document.querySelector(".app-wrapper");
-      overlayVisible = !overlayVisible;
-      app.style.opacity = overlayVisible ? "1" : "0.15";
-      document.getElementById("lbl-3d-status").innerText = overlayVisible ? "ACTIVE" : "FULLSCREEN 3D";
-    }
-
-    // --- Tab Navigation & Lang Switcher ---
-    let isAr = false;
-
-    function toggleLang() {
-      isAr = !isAr;
-      document.documentElement.lang = isAr ? "ar" : "en";
-      document.documentElement.dir = isAr ? "rtl" : "ltr";
-      document.getElementById("lbl-lang").innerText = isAr ? "EN" : "عربي";
-      document.getElementById("lbl-sub").innerText = isAr ? "عمليات تكتيكية ثلاثية الأبعاد • مخيم المواصي" : "3D Tactical Operations • Mawasi Camp";
-      document.getElementById("lbl-cal-hdr").innerText = isAr ? "جدول الـ 20 يوم عمل (اضغط للتنقل)" : "20-Workday Mission Grid (Tap to jump)";
-      document.getElementById("lbl-tasks-hdr").innerText = isAr ? "جدول المهام التشغيلية المفصل للأيام العشرين" : "Complete 20-Day Detailed Operational Roster";
-      document.getElementById("lbl-dir-hdr").innerText = isAr ? "هيكلية المجلدات على السحابة والحاسوب (SOS_Security_2026)" : "Cloud & Offline Directory Structure (SOS_Security_2026)";
-      document.getElementById("lbl-sop-hdr").innerText = isAr ? "إجراءات الطوارئ التكتيكية بمخيم المواصي" : "Mawasi Tactical Standard Operating Procedures";
-      document.getElementById("nav-lbl-plan").innerText = isAr ? "الخطة (20 يوم)" : "PLAN (20D)";
-      document.getElementById("nav-lbl-folders").innerText = isAr ? "المجلدات" : "FOLDERS";
-      document.getElementById("nav-lbl-sop").innerText = isAr ? "البروتوكولات" : "SOPs";
-
-      document.querySelectorAll("[data-en]").forEach(el => {
-        el.innerText = isAr ? el.getAttribute("data-ar") : el.getAttribute("data-en");
-      });
-    }
-
-    function showTab(tabId, btn) {
-      document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
-      document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
-      document.getElementById(tabId).classList.add("active");
-      btn.classList.add("active");
-      window.scrollTo(0, 0);
-    }
-
-    function jumpTo(day) {
-      const el = document.getElementById("day-" + day);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-        el.style.boxShadow = "0 0 16px var(--neon-green)";
-        setTimeout(() => el.style.boxShadow = "none", 1200);
-      }
-    }
-
-    // Initialize 3D Engine on load
-    window.addEventListener("DOMContentLoaded", () => {
-      try {
-        init3D();
-      } catch (err) {
-        console.warn("3D engine fallback mode:", err);
-      }
-    });
   </script>
 </body>
 </html>
