@@ -248,6 +248,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       );
                     }),
                   )),
+                  _header(s('REPORTS', 'التقارير')),
+                  _card(ListTile(
+                  leading: const Icon(Icons.bar_chart, color: kGreen),
+                  title: Text(s('Completion reports', 'تقارير الإنجاز')),
+                  trailing: const Icon(Icons.chevron_right, color: kDimGreen),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const StatsScreen()),
+                  ),
+                )),
 
                   // ---------- Data ----------
                   _header(s('DATA', 'البيانات')),
