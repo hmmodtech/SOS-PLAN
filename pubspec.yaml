@@ -1,4 +1,4 @@
-```yaml
+
 name: sos_planner
 description: A.Jami Safety and Security Officer planner
 publish_to: "none"
@@ -39,4 +39,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-```
+
