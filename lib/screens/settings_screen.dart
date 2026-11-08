@@ -1,3 +1,4 @@
+import 'stats_screen.dart';
 import 'package:flutter/material.dart';
 import '../core/app_state.dart';
 import '../core/theme.dart';
