@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SOS Gaza SSO - Monthly Calendar & Task Planner</title>
+  <title>SOS Gaza SSO - Calendar</title>
   <style>
     :root {
       --bg: #080b10;
@@ -16,7 +16,7 @@
       --red: #ff3c3c;
       --text: #e6edf3;
       --muted: #7d8590;
-      --font: 'JetBrains Mono', 'Fira Code', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+      --font: 'JetBrains Mono', 'Fira Code', -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -26,81 +26,64 @@
       color: var(--text);
       font-family: var(--font);
       min-height: 100vh;
-      padding: 12px 10px 40px;
+      padding: 8px 6px 40px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      overflow-x: hidden;
+      width: 100vw;
     }
 
     .container {
       width: 100%;
-      max-width: 800px;
+      max-width: 500px;
     }
 
     /* Top HUD */
     .top-header {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 14px;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
     }
 
     .title-box h1 {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       font-weight: 800;
       color: var(--green);
-      letter-spacing: 0.5px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .pulse-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       background: var(--green);
       border-radius: 50%;
-      box-shadow: 0 0 8px var(--green);
-      animation: pulse 1.8s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 1; }
+      box-shadow: 0 0 6px var(--green);
     }
 
     .title-box p {
-      font-size: 0.65rem;
+      font-size: 0.58rem;
       color: var(--muted);
-      margin-top: 2px;
-      text-transform: uppercase;
+      margin-top: 1px;
     }
 
-    /* Lang Toggle Button */
     .btn-lang {
       background: var(--bg);
       border: 1px solid var(--green);
       color: var(--green);
       font-family: var(--font);
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 700;
-      padding: 6px 14px;
-      border-radius: 20px;
+      padding: 4px 10px;
+      border-radius: 14px;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 0 10px rgba(57, 255, 20, 0.15);
-      transition: all 0.2s;
-    }
-
-    .btn-lang:active {
-      background: rgba(57, 255, 20, 0.2);
     }
 
     /* Cycle Bar */
@@ -108,14 +91,12 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 8px 14px;
-      margin-bottom: 14px;
+      padding: 6px 10px;
+      margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      font-size: 0.72rem;
+      font-size: 0.65rem;
     }
 
     .cycle-select {
@@ -123,50 +104,50 @@
       border: 1px solid var(--border);
       color: var(--green);
       font-family: var(--font);
-      font-size: 0.72rem;
-      padding: 4px 8px;
+      font-size: 0.65rem;
+      padding: 3px 6px;
       border-radius: 4px;
     }
 
-    /* Monthly Grid Calendar */
+    /* Calendar Grid Fixed To 100% Mobile Screen */
     .calendar-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px;
-      margin-bottom: 16px;
-      overflow-x: auto;
+      border-radius: 6px;
+      padding: 8px 6px;
+      margin-bottom: 10px;
+      width: 100%;
     }
 
     .calendar-head-title {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
       border-bottom: 1px solid var(--border);
     }
 
     .cal-month-name {
-      font-size: 0.95rem;
+      font-size: 0.8rem;
       font-weight: 800;
       color: var(--green);
     }
 
     .cal-hint {
-      font-size: 0.65rem;
+      font-size: 0.58rem;
       color: var(--muted);
     }
 
     .calendar-table {
       width: 100%;
+      table-layout: fixed; /* Strictly lock columns to 1/7 of screen width */
       border-collapse: collapse;
-      min-width: 580px;
     }
 
     .calendar-table th {
-      padding: 8px 4px;
-      font-size: 0.68rem;
+      padding: 4px 1px;
+      font-size: 0.6rem;
       color: var(--muted);
       border-bottom: 1px solid var(--border);
       text-align: center;
@@ -174,92 +155,88 @@
     }
 
     .calendar-table td {
-      width: 14.28%;
-      height: 78px;
-      vertical-align: top;
-      padding: 5px;
+      height: 48px;
+      vertical-align: middle;
+      padding: 2px 1px;
       border: 1px solid var(--border);
       background: var(--bg);
       cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .calendar-table td:hover {
-      border-color: var(--green);
-      background: var(--cell);
+      text-align: center;
+      position: relative;
     }
 
     .calendar-table td.empty {
       background: transparent;
-      border-color: rgba(21, 34, 46, 0.3);
+      border-color: rgba(21, 34, 46, 0.2);
       cursor: default;
     }
 
     .calendar-table td.weekend {
       background: rgba(13, 18, 26, 0.4);
-      opacity: 0.45;
+      opacity: 0.35;
       cursor: default;
     }
 
     .calendar-table td.active-day {
-      border: 1px solid var(--green);
-      background: rgba(57, 255, 20, 0.08);
-      box-shadow: inset 0 0 10px var(--green-glow);
+      border: 1.5px solid var(--green) !important;
+      background: rgba(57, 255, 20, 0.12) !important;
+      box-shadow: inset 0 0 8px var(--green-glow);
     }
 
-    .cell-top {
+    .cell-content {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
       align-items: center;
-      margin-bottom: 4px;
+      justify-content: center;
+      gap: 2px;
     }
 
     .day-num {
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       font-weight: 800;
       color: var(--text);
+      line-height: 1;
     }
 
     .day-badge {
-      font-size: 0.55rem;
-      padding: 1px 4px;
+      font-size: 0.5rem;
+      padding: 1px 3px;
       border-radius: 2px;
-      background: rgba(57, 255, 20, 0.15);
+      background: rgba(57, 255, 20, 0.18);
       color: var(--green);
-      font-weight: 700;
+      font-weight: 800;
+      line-height: 1;
     }
 
-    .cell-snippet {
-      font-size: 0.62rem;
-      color: var(--muted);
-      line-height: 1.25;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
+    .dot-indicator {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-top: 1px;
     }
 
     /* Selected Day Tasks Card */
     .task-details-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-left: 4px solid var(--green);
-      border-radius: 8px;
-      padding: 14px;
-      margin-bottom: 14px;
+      border-left: 3px solid var(--green);
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 10px;
     }
 
     .task-details-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
       border-bottom: 1px solid var(--border);
     }
 
     .task-day-title {
-      font-size: 0.95rem;
+      font-size: 0.8rem;
       font-weight: 800;
       color: var(--green);
     }
@@ -269,52 +246,48 @@
       border: 1px solid var(--green);
       color: var(--green);
       font-family: var(--font);
-      font-size: 0.68rem;
+      font-size: 0.62rem;
       font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 4px;
+      padding: 3px 8px;
+      border-radius: 3px;
       cursor: pointer;
-    }
-
-    .btn-edit:active {
-      background: rgba(57, 255, 20, 0.2);
     }
 
     .task-details-body {
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 12px;
-      font-size: 0.75rem;
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-size: 0.7rem;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .detail-label {
-      font-size: 0.62rem;
+      font-size: 0.58rem;
       color: var(--amber);
       font-weight: 700;
       text-transform: uppercase;
-      margin-bottom: 2px;
+      margin-bottom: 1px;
     }
 
     .detail-text {
       color: var(--text);
-      line-height: 1.45;
+      line-height: 1.35;
     }
 
     /* Edit Modal */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(8, 11, 16, 0.9);
+      background: rgba(8, 11, 16, 0.92);
       backdrop-filter: blur(4px);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 200;
-      padding: 14px;
+      padding: 12px;
     }
 
     .modal-overlay.open { display: flex; }
@@ -322,11 +295,11 @@
     .modal-box {
       background: var(--card);
       border: 1px solid var(--green);
-      box-shadow: 0 0 25px rgba(57, 255, 20, 0.25);
+      box-shadow: 0 0 20px rgba(57, 255, 20, 0.2);
       width: 100%;
-      max-width: 500px;
-      border-radius: 8px;
-      padding: 16px;
+      max-width: 450px;
+      border-radius: 6px;
+      padding: 14px;
       max-height: 90vh;
       overflow-y: auto;
     }
@@ -336,23 +309,23 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 8px;
-      margin-bottom: 12px;
-      font-size: 0.85rem;
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+      font-size: 0.8rem;
       color: var(--green);
       font-weight: 800;
     }
 
     .form-group {
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .form-label {
       display: block;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       color: var(--muted);
       text-transform: uppercase;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     .form-input, .form-textarea {
@@ -361,9 +334,9 @@
       border: 1px solid var(--border);
       color: var(--text);
       font-family: var(--font);
-      font-size: 0.75rem;
-      padding: 8px;
-      border-radius: 4px;
+      font-size: 0.72rem;
+      padding: 6px;
+      border-radius: 3px;
     }
 
     .form-input:focus, .form-textarea:focus {
@@ -378,57 +351,52 @@
       border: none;
       font-family: var(--font);
       font-weight: 800;
-      font-size: 0.8rem;
-      padding: 10px;
-      border-radius: 4px;
+      font-size: 0.75rem;
+      padding: 8px;
+      border-radius: 3px;
       cursor: pointer;
-      margin-top: 6px;
+      margin-top: 4px;
     }
 
-    /* RTL Support */
-    [dir="rtl"] {
-      text-align: right;
-    }
+    /* RTL */
+    [dir="rtl"] { text-align: right; }
     [dir="rtl"] .task-details-card {
       border-left: 1px solid var(--border);
-      border-right: 4px solid var(--green);
+      border-right: 3px solid var(--green);
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <!-- Top Header HUD -->
     <div class="top-header">
       <div class="title-box">
         <h1><span class="pulse-dot"></span> <span id="lbl-title">SOS GAZA SSO CALENDAR</span></h1>
-        <p id="lbl-sub">30-Day Mission Calendar • Mawasi Khan Yunis Operations</p>
+        <p id="lbl-sub">30-Day Mission Calendar • Mawasi Khan Yunis</p>
       </div>
       <button class="btn-lang" onclick="toggleLang()">
         <span>🌐</span> <b id="lbl-lang-btn">عربي</b>
       </button>
     </div>
 
-    <!-- Cycle Bar -->
     <div class="cycle-bar">
       <div>
-        <span style="color:var(--muted);" id="lbl-start">Cycle Start: </span>
+        <span style="color:var(--muted);" id="lbl-start">Start: </span>
         <select class="cycle-select" id="start-date-select" onchange="changeStartDate(this.value)">
-          <option value="15">15 Nov 2026 (Sunday)</option>
-          <option value="16">16 Nov 2026 (Monday)</option>
+          <option value="15">15 Nov 2026 (Sun)</option>
+          <option value="16">16 Nov 2026 (Mon)</option>
         </select>
       </div>
       <div>
-        <span style="color:var(--muted);" id="lbl-workdays">Workdays: </span>
-        <b style="color:var(--green);" id="lbl-workdays-val">20 Days (Sun - Thu)</b>
+        <span style="color:var(--muted);" id="lbl-workdays">Cycle: </span>
+        <b style="color:var(--green);" id="lbl-workdays-val">20 Days (Sun-Thu)</b>
       </div>
     </div>
 
-    <!-- Full Month Grid Calendar -->
     <div class="calendar-card">
       <div class="calendar-head-title">
         <span class="cal-month-name" id="lbl-month-name">NOVEMBER 2026</span>
-        <span class="cal-hint" id="lbl-hint">Tap any work day to view and edit details</span>
+        <span class="cal-hint" id="lbl-hint">Tap day to view/edit</span>
       </div>
 
       <table class="calendar-table">
@@ -443,13 +411,10 @@
             <th>SAT</th>
           </tr>
         </thead>
-        <tbody id="calendar-body">
-          <!-- Calendar cells rendered by JS -->
-        </tbody>
+        <tbody id="calendar-body"></tbody>
       </table>
     </div>
 
-    <!-- Selected Day Detail View -->
     <div class="task-details-card">
       <div class="task-details-header">
         <span class="task-day-title" id="det-day-header">DAY 1 DETAILS</span>
@@ -457,7 +422,7 @@
       </div>
       <div class="task-details-body">
         <div>
-          <div class="detail-label" id="lbl-det-task">Core Operational Task:</div>
+          <div class="detail-label" id="lbl-det-task">Core Task:</div>
           <div class="detail-text" id="det-task">-</div>
         </div>
         <div>
@@ -465,7 +430,7 @@
           <div class="detail-text" id="det-req">-</div>
         </div>
         <div>
-          <div class="detail-label" id="lbl-det-act">Exact Action to Execute:</div>
+          <div class="detail-label" id="lbl-det-act">Action to Execute:</div>
           <div class="detail-text" id="det-act">-</div>
         </div>
         <div>
@@ -476,7 +441,6 @@
     </div>
   </div>
 
-  <!-- Edit Task Modal -->
   <div class="modal-overlay" id="edit-modal">
     <div class="modal-box">
       <div class="modal-header">
@@ -507,10 +471,9 @@
 
   <script>
     let isAr = false;
-    let startDayNum = 15; // 15 or 16
+    let startDayNum = 15;
     let selectedDayIndex = 1;
 
-    // Master 20 Days Plan
     const MASTER_TASKS = [
       {
         dayIndex: 1,
@@ -707,235 +670,3 @@
         reqAr: "أخصائي حماية الطفل والدعم النفسي: الإشراف المباشر على النشاط التفاعلي.",
         actEn: "Guide children calmly into central reinforced communal tent without triggering alarm.",
         actAr: "تنظيم نشاط هادئ لتوجيه الأطفال نحو الخيمة الأكثر تحصيناً دون إثارة أي هلع.",
-        talkEn: "MHPSS specialists: Review child reactions and address any triggered anxiety signs.",
-        talkAr: "الأخصائيين النفسيين: تقييم سلوك الأطفال والتأكد من عدم وجود أي أثر نفسي سلبي."
-      },
-      {
-        dayIndex: 19,
-        titleEn: "Day 19: Month 1 Comprehensive Security Review Report",
-        titleAr: "اليوم 19: صياغة التقرير الأمني التقييمي الأول للشهر الأول",
-        reqEn: "Logistics, Camp Manager, and Maintenance: Final status of resolved audit items.",
-        reqAr: "اللوجستيات ومسؤولي الصيانة: كشف نهائي بما تم إنجازه وإصلاحه من الثغرات.",
-        actEn: "Draft First 30-Day Comprehensive Security Evaluation covering Mawasi mitigations.",
-        actAr: "كتابة تقرير التقييم الأمني الشامل للشهر الأول وتوضيح التحصينات والتوصيات المتبقية.",
-        talkEn: "Area Director: Present executive summary and risk reduction roadmap.",
-        talkAr: "مدير المنطقة: استعراض ملخص التقرير والتقدم المحرز في رفع الجاهزية."
-      },
-      {
-        dayIndex: 20,
-        titleEn: "Day 20: 90-Day Operational Plan & SSP Ratification",
-        titleAr: "اليوم 20: إقرار خطة العمل للأشهر الثلاثة القادمة (90 يوماً)",
-        reqEn: "Senior Leadership Team: Final conference to approve future safety roadmap.",
-        reqAr: "فريق القيادة العليا: جلسة اعتماد مخرجات الشهر وخطة الربع القادم.",
-        actEn: "Ratify Mawasi Camp Site Security Plan (SSP) and schedule monthly routine inspection calendar.",
-        actAr: "اعتماد خطة أمن الموقع (SSP) لمخيم المواصي، وجدولة الفحص الدوري الشهري.",
-        talkEn: "Entire SOS Operations & Programs family: Transition officially into stable operations.",
-        talkAr: "كافة الزملاء في العمليات والبرامج: شكرهم على التعاون والانتقال للوضع التشغيلي المستقر."
-      }
-    ];
-
-    let currentTasks = [];
-
-    function initData() {
-      try {
-        const stored = localStorage.getItem("sos_cal_grid_tasks_v2");
-        if (stored) {
-          currentTasks = JSON.parse(stored);
-        } else {
-          currentTasks = JSON.parse(JSON.stringify(MASTER_TASKS));
-        }
-      } catch (e) {
-        currentTasks = JSON.parse(JSON.stringify(MASTER_TASKS));
-      }
-    }
-
-    function saveToStorage() {
-      try {
-        localStorage.setItem("sos_cal_grid_tasks_v2", JSON.stringify(currentTasks));
-      } catch (e) {}
-    }
-
-    // November 2026 starts on Sunday (Nov 1 = Sun)
-    // Days 1 to 30.
-    function renderCalendar() {
-      const tbody = document.getElementById("calendar-body");
-      tbody.innerHTML = "";
-
-      let dayCounter = 1;
-      let workDayIndex = 1;
-
-      // 5 weeks in Nov 2026
-      for (let w = 0; w < 5; w++) {
-        const tr = document.createElement("tr");
-        for (let col = 0; col < 7; col++) {
-          const td = document.createElement("td");
-          if (dayCounter > 30) {
-            td.className = "empty";
-            tr.appendChild(td);
-            continue;
-          }
-
-          const currentDayNum = dayCounter;
-          const isFri = (col === 5);
-          const isSat = (col === 6);
-
-          if (isFri || isSat) {
-            td.className = "weekend";
-            td.innerHTML = `<div class="cell-top"><span class="day-num">${currentDayNum}</span></div>`;
-          } else {
-            // Check if within the 20-workday window
-            if (currentDayNum >= startDayNum && workDayIndex <= 20) {
-              const thisWorkIdx = workDayIndex;
-              const taskObj = currentTasks.find(t => t.dayIndex === thisWorkIdx);
-              const titleText = isAr ? (taskObj.titleAr || taskObj.titleEn) : taskObj.titleEn;
-
-              if (thisWorkIdx === selectedDayIndex) {
-                td.className = "active-day";
-              }
-
-              td.onclick = () => selectDay(thisWorkIdx, td);
-
-              td.innerHTML = `
-                <div class="cell-top">
-                  <span class="day-num">${currentDayNum}</span>
-                  <span class="day-badge">D${thisWorkIdx}</span>
-                </div>
-                <div class="cell-snippet">${titleText}</div>
-              `;
-              workDayIndex++;
-            } else {
-              td.innerHTML = `<div class="cell-top"><span class="day-num">${currentDayNum}</span></div>`;
-            }
-          }
-
-          tr.appendChild(td);
-          dayCounter++;
-        }
-        tbody.appendChild(tr);
-      }
-    }
-
-    function selectDay(workIdx, tdElement) {
-      selectedDayIndex = workIdx;
-      document.querySelectorAll(".calendar-table td").forEach(el => el.classList.remove("active-day"));
-      if (tdElement) tdElement.classList.add("active-day");
-      renderTaskDetails();
-    }
-
-    function renderTaskDetails() {
-      const task = currentTasks.find(t => t.dayIndex === selectedDayIndex);
-      if (!task) return;
-
-      const title = isAr ? (task.titleAr || task.titleEn) : task.titleEn;
-      const req = isAr ? (task.reqAr || task.reqEn) : task.reqEn;
-      const act = isAr ? (task.actAr || task.actEn) : task.actEn;
-      const talk = isAr ? (task.talkAr || task.talkEn) : task.talkEn;
-
-      document.getElementById("det-day-header").innerText = isAr 
-        ? `تفاصيل اليوم ${task.dayIndex} (D${task.dayIndex})` 
-        : `DAY ${task.dayIndex} DETAILS (D${task.dayIndex})`;
-
-      document.getElementById("det-task").innerText = title;
-      document.getElementById("det-req").innerText = req || "-";
-      document.getElementById("det-act").innerText = act;
-      document.getElementById("det-talk").innerText = talk || "-";
-    }
-
-    function toggleLang() {
-      isAr = !isAr;
-      document.documentElement.lang = isAr ? "ar" : "en";
-      document.documentElement.dir = isAr ? "rtl" : "ltr";
-
-      document.getElementById("lbl-lang-btn").innerText = isAr ? "EN" : "عربي";
-      document.getElementById("lbl-title").innerText = isAr ? "تقويم دوام مسؤول الأمن SOS" : "SOS GAZA SSO CALENDAR";
-      document.getElementById("lbl-sub").innerText = isAr ? "خطة الـ 30 يوماً • عمليات مخيم مواصي خانيونس" : "30-Day Mission Calendar • Mawasi Khan Yunis Operations";
-      document.getElementById("lbl-start").innerText = isAr ? "بداية الدوام: " : "Cycle Start: ";
-      document.getElementById("lbl-workdays").innerText = isAr ? "أيام العمل: " : "Workdays: ";
-      document.getElementById("lbl-workdays-val").innerText = isAr ? "20 يوم (الأحد - الخميس)" : "20 Days (Sun - Thu)";
-      document.getElementById("lbl-month-name").innerText = isAr ? "نوفمبر 2026" : "NOVEMBER 2026";
-      document.getElementById("lbl-hint").innerText = isAr ? "اضغط على أي يوم عمل لعرض وتعديل تفاصيله" : "Tap any work day to view and edit details";
-      document.getElementById("btn-edit").innerText = isAr ? "✎ تعديل المهمة" : "✎ EDIT TASK";
-
-      document.getElementById("lbl-det-task").innerText = isAr ? "المهمة التشغيلية الرئيسية:" : "Core Operational Task:";
-      document.getElementById("lbl-det-req").innerText = isAr ? "من مين تطلب:" : "From Whom to Request:";
-      document.getElementById("lbl-det-act").innerText = isAr ? "شو تعمل بالضبط:" : "Exact Action to Execute:";
-      document.getElementById("lbl-det-talk").innerText = isAr ? "مين تكلّم وتنسق معه:" : "Whom to Contact / Debrief:";
-
-      // Headers row
-      const thRow = document.getElementById("cal-th-row");
-      if (isAr) {
-        thRow.innerHTML = "<th>الأحد</th><th>الإثنين</th><th>الثلاثاء</th><th>الأربعاء</th><th>الخميس</th><th>الجمعة</th><th>السبت</th>";
-      } else {
-        thRow.innerHTML = "<th>SUN</th><th>MON</th><th>TUE</th><th>WED</th><th>THU</th><th>FRI</th><th>SAT</th>";
-      }
-
-      renderCalendar();
-      renderTaskDetails();
-    }
-
-    function changeStartDate(val) {
-      startDayNum = parseInt(val, 10);
-      renderCalendar();
-      renderTaskDetails();
-    }
-
-    // Modal Edit Operations
-    function openEditModal() {
-      const task = currentTasks.find(t => t.dayIndex === selectedDayIndex);
-      if (!task) return;
-
-      document.getElementById("modal-heading").innerText = isAr ? `تعديل مهمة اليوم ${task.dayIndex}` : `EDIT DAY ${task.dayIndex} TASK`;
-      document.getElementById("lbl-form-title").innerText = isAr ? "عنوان المهمة" : "Task Title";
-      document.getElementById("lbl-form-req").innerText = isAr ? "من مين تطلب" : "From Whom to Request";
-      document.getElementById("lbl-form-act").innerText = isAr ? "شو تعمل بالضبط" : "Action to Execute";
-      document.getElementById("lbl-form-talk").innerText = isAr ? "مين تكلّم وتنسق معه" : "Whom to Contact / Debrief";
-      document.getElementById("btn-submit").innerText = isAr ? "حفظ التعديلات" : "SAVE MISSION CHANGES";
-
-      document.getElementById("form-task").value = isAr ? (task.titleAr || task.titleEn) : task.titleEn;
-      document.getElementById("form-req").value = isAr ? (task.reqAr || task.reqEn) : task.reqEn;
-      document.getElementById("form-act").value = isAr ? (task.actAr || task.actEn) : task.actEn;
-      document.getElementById("form-talk").value = isAr ? (task.talkAr || task.talkEn) : task.talkEn;
-
-      document.getElementById("edit-modal").classList.add("open");
-    }
-
-    function closeEditModal() {
-      document.getElementById("edit-modal").classList.remove("open");
-    }
-
-    function saveTaskEdit(e) {
-      e.preventDefault();
-      const task = currentTasks.find(t => t.dayIndex === selectedDayIndex);
-      if (!task) return;
-
-      const title = document.getElementById("form-task").value.trim();
-      const req = document.getElementById("form-req").value.trim();
-      const act = document.getElementById("form-act").value.trim();
-      const talk = document.getElementById("form-talk").value.trim();
-
-      if (isAr) {
-        task.titleAr = title;
-        task.reqAr = req;
-        task.actAr = act;
-        task.talkAr = talk;
-      } else {
-        task.titleEn = title;
-        task.reqEn = req;
-        task.actEn = act;
-        task.talkEn = talk;
-      }
-
-      saveToStorage();
-      closeEditModal();
-      renderCalendar();
-      renderTaskDetails();
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      initData();
-      renderCalendar();
-      renderTaskDetails();
-    });
-  </script>
-</body>
-</html>
