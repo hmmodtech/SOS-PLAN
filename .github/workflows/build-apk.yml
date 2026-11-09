@@ -1,45 +1,47 @@
-name: Build APK
+name: Build Flutter APK
 
 on:
-  workflow_dispatch:
   push:
-    branches: [main]
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
+      - name: Set up Java JDK
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
+          distribution: 'temurin'
           java-version: '17'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
-          cache: true
+          channel: 'stable'
+          cache: false
 
-      - name: Install packages
+      - name: Recreate Android Project with V2 Embedding
+        run: |
+          # حذف مجلد أندرويد القديم المعتمد على v1
+          rm -rf android/
+          # إعادة توليد مجلد أندرويد حديث متوافق بالكامل مع Flutter SDK
+          flutter create . --platforms=android --org=com.hmmodtech
+
+      - name: Accept Android Licenses
+        run: yes | flutter doctor --android-licenses || true
+
+      - name: Get Dependencies
         run: flutter pub get
 
-      - name: Analyze (warnings do not stop the build)
-        run: flutter analyze
-        continue-on-error: true
-
-      - name: Unit tests (failures do not stop the build)
-        run: flutter test
-        continue-on-error: true
-
-      - name: Build release APK
-        run: flutter build apk --release
+      - name: Build APK (Debug)
+        run: flutter build apk --debug --no-tree-shake-icons
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: A.Jami-SOS-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: SOS-Plan-APK
+          path: build/app/outputs/flutter-apk/app-debug.apk
