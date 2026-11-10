@@ -1,6 +1,4 @@
 
-
-```dart
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -180,4 +178,4 @@ class _RainPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _RainPainter old) => true;
 }
-```
+
