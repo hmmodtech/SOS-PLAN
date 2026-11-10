@@ -1,5 +1,4 @@
 
-```dart
 import 'dart:convert';
 
 const kCategories = ['general', 'security', 'logistics', 'child', 'admin'];
@@ -145,4 +144,4 @@ class Note {
         text: m['text'] as String,
       );
 }
-```
+
