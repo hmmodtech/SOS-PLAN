@@ -9,7 +9,9 @@ import '../core/theme.dart';
 import '../data/database.dart';
 import '../data/models.dart';
 import '../services/notifications.dart';
+import '../services/widget_bridge.dart';
 import 'search_screen.dart';
+import 'stats_screen.dart';
 import 'settings_screen.dart';
 import 'task_form_screen.dart';
 
@@ -32,6 +34,18 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _load();
+    // Widget taps: the + button opens the new-task form, and memo taps pull
+    // whatever was typed on the home screen into the database.
+    WidgetBridge.listen(
+      onNewTask: () async {
+        _load();
+        if (mounted) await _openForm();
+      },
+      onMemos: () async {
+        await WidgetBridge.pullWidgetMemos();
+        if (mounted) await _load();
+      },
+    );
   }
 
   @override
@@ -51,6 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _done = done;
       _notes = notes;
     });
+    // Keep the home-screen widgets in step with every change made here.
+    WidgetBridge.sync();
   }
 
   List<Task> _tasksOn(DateTime d) =>
@@ -316,6 +332,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 tooltip: 'Panic',
                 icon: const Icon(Icons.shield_outlined, color: kRed),
                 onPressed: () => s.setPanic(true),
+              ),
+              IconButton(
+                tooltip: s.t('Result', 'النتيجة'),
+                icon: const Icon(Icons.insights_outlined),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const StatsScreen()),
+                ),
               ),
               IconButton(icon: const Icon(Icons.search), onPressed: _search),
               TextButton(

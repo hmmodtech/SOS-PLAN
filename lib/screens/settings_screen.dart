@@ -8,6 +8,7 @@ import '../data/models.dart';
 import '../services/calendar_sync.dart';
 import '../services/export.dart';
 import '../services/notifications.dart';
+import '../services/widget_bridge.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -160,6 +161,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       setState(() {
                         appState.setArabic(v);
                       });
+                      WidgetBridge.sync();
                     },
                   )),
 

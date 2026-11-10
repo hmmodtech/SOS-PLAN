@@ -44,6 +44,56 @@
             </intent-filter>
         </activity>
 
+        <!-- Fast memo sheet opened from the memo widget -->
+        <activity
+            android:name=".widget.QuickMemoActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@style/WidgetSheetTheme"
+            android:windowSoftInputMode="adjustResize|stateVisible" />
+
+        <!-- ============ Home-screen widgets ============ -->
+        <receiver
+            android:name=".widget.TasksWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_list_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.ajami.sos.widget.TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_tasks_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.MemoWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_memo_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.ajami.sos.widget.ADD_MEMO" />
+                <action android:name="com.ajami.sos.widget.REFRESH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_memo_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.ResultWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_result_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.ajami.sos.widget.REFRESH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_result_info" />
+        </receiver>
+
         <!-- Required by flutter_local_notifications to fire and re-schedule bells -->
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"

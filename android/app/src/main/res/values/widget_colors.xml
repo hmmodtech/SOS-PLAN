@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches lib/core/theme.dart -->
+    <color name="widget_bg">#000803</color>
+    <color name="widget_bg_card">#031A08</color>
+    <color name="widget_green">#00FF41</color>
+    <color name="widget_dim">#00B32C</color>
+    <color name="widget_red">#FF3B3B</color>
+    <color name="widget_amber">#E8C84A</color>
+    <color name="widget_text">#E6FFF0</color>
+    <color name="widget_muted">#7FA88B</color>
+    <color name="widget_border">#1F5C33</color>
+
+    <!-- Same icon as the app: usable as notification/companion small icon -->
+    <color name="widget_transparent">#00000000</color>
+</resources>

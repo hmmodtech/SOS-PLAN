@@ -13,6 +13,7 @@ import 'data/seed.dart';
 import 'screens/home_screen.dart';
 import 'services/notifications.dart';
 import 'services/security.dart';
+import 'services/widget_bridge.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -108,6 +109,12 @@ class _BootGateState extends State<BootGate> {
       // Re-scheduling bells is the heaviest and most failure-prone step, so it
       // runs last and never blocks the UI.
       unawaited(_step('reminders', Bell.resyncAll));
+      // Move memos typed on the home-screen widget into the database, then
+      // publish a fresh snapshot for the widgets.
+      unawaited(_step('widgets', () async {
+        await WidgetBridge.pullWidgetMemos();
+        await WidgetBridge.sync();
+      }));
       if (!mounted) return;
       setState(() => _done = true);
     } catch (e) {

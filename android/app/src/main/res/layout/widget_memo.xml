@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quick memo widget: recent memos + a button that opens the fast memo sheet.
+     EditText is not allowed inside RemoteViews, so typing happens in
+     QuickMemoActivity, which looks and feels like an inline field. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@drawable/widget_bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/widget_memo_label"
+            android:textColor="@color/widget_green"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <ImageView
+            android:id="@+id/w_send"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="6dp"
+            android:src="@android:drawable/ic_menu_send"
+            android:contentDescription="@string/widget_add" />
+    </LinearLayout>
+
+    <!-- Looks like an input box; tapping it opens the memo sheet. -->
+    <TextView
+        android:id="@+id/w_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/widget_input_bg"
+        android:hint="@string/widget_memo_hint"
+        android:textColorHint="@color/widget_muted"
+        android:textColor="@color/widget_text"
+        android:textSize="12sp"
+        android:padding="9dp"
+        android:minHeight="40dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:text="@string/widget_memo_hint" />
+
+    <TextView
+        android:id="@+id/w_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/widget_memo_empty"
+        android:textColor="@color/widget_muted"
+        android:textSize="11sp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/w_rows"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="6dp"
+        android:orientation="vertical" />
+</LinearLayout>
