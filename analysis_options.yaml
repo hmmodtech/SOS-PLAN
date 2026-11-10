@@ -1,0 +1,11 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    # Keep these as hints: CI must not fail on style-only findings.
+    deprecated_member_use: info
+    avoid_relative_lib_imports: info
+
+linter:
+  rules:
+    prefer_const_constructors: true
