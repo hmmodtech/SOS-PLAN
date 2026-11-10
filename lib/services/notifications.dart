@@ -1,4 +1,3 @@
-
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -9,135 +8,130 @@ import '../data/models.dart';
 
 class Bell {
   Bell._();
-  static final _plugin = FlutterLocalNotificationsPlugin();
-  static const _digestId = 999001;
-  static const _details = NotificationDetails(
+
+  static final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
+  static const String _channelId = 'sos_tasks';
+  static const int _digestId = 999001;
+  static bool _ready = false;
+
+  static const NotificationDetails _details = NotificationDetails(
     android: AndroidNotificationDetails(
-      'sos_tasks',
+      _channelId,
       'Task reminders',
-      channelDescription: 'Bell reminders for SOS tasks',
-      importance: Importance.max,
+      channelDescription: 'Bell reminders for tasks',
+      importance: Importance.high,
       priority: Priority.high,
     ),
+    iOS: DarwinNotificationDetails(),
   );
 
   static Future<void> init() async {
+    if (_ready) return;
     tz.initializeTimeZones();
-    tz.setLocalLocation(tz.getLocation(await FlutterTimezone.getLocalTimezone()));
-    await _plugin.initialize(const InitializationSettings(
+    try {
+      final name = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(name));
+    } catch (_) {
+      tz.setLocalLocation(tz.getLocation('UTC'));
+    }
+
+    const settings = InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-    ));
+      iOS: DarwinInitializationSettings(),
+    );
+    await _plugin.initialize(settings);
+
     final android = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
+    await android?.createNotificationChannel(const AndroidNotificationChannel(
+      _channelId,
+      'Task reminders',
+      description: 'Bell reminders for tasks',
+      importance: Importance.high,
+    ));
     await android?.requestNotificationsPermission();
-    await android?.requestExactAlarmsPermission();
+    _ready = true;
   }
 
-  /// يجدول الجرس لأقرب موعد قادم. المتكرر يستخدم matchDateTimeComponents فيتكرر تلقائياً.
   static Future<void> schedule(Task t, int id,
       {required bool enabled, bool done = false}) async {
-    await _plugin.cancel(id);
-    if (!enabled || t.remindAt == null) return;
-    if (done && t.recurrence == 'none') return;
+    await cancel(id);
+    final remind = t.remindAt;
+    if (!enabled || done || remind == null) return;
 
-    final now = DateTime.now();
-    DateTime? first;
-    for (var i = 0; i < 400 && first == null; i++) {
-      final day = DateTime(now.year, now.month, now.day + i);
-      final at = t.bellOn(day)!;
-      if (at.isAfter(now) && t.occursOn(day)) first = at;
-    }
-    if (first == null) return;
+    final when = tz.TZDateTime.from(remind, tz.local);
+    final recurring = t.recurrence != 'none';
+    if (!recurring && when.isBefore(tz.TZDateTime.now(tz.local))) return;
 
-    final match = switch (t.recurrence) {
+    final DateTimeComponents? match = switch (t.recurrence) {
       'daily' => DateTimeComponents.time,
       'weekly' => DateTimeComponents.dayOfWeekAndTime,
       'monthly' => DateTimeComponents.dayOfMonthAndTime,
       _ => null,
     };
-    final body = t.details(appState.isArabic);
 
+    final details = t.details(appState.isArabic);
     await _plugin.zonedSchedule(
       id,
       t.title(appState.isArabic),
-      body.isEmpty ? null : body,
-      tz.TZDateTime.from(first, tz.local),
+      details.isEmpty ? catLabel(t.category) : details,
+      when,
       _details,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: match,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: match,
     );
   }
 
   static Future<void> cancel(int id) => _plugin.cancel(id);
 
   static Future<void> digest({required bool enabled}) async {
-    await _plugin.cancel(_digestId);
+    await cancel(_digestId);
     if (!enabled) return;
-    final now = DateTime.now();
-    final at = DateTime(now.year, now.month, now.day, 7, 30);
-    final first = at.isAfter(now)
-        ? at
-        : DateTime(now.year, now.month, now.day + 1, 7, 30);
+
+    final now = tz.TZDateTime.now(tz.local);
+    var at = tz.TZDateTime(tz.local, now.year, now.month, now.day, 7, 30);
+    if (at.isBefore(now)) at = at.add(const Duration(days: 1));
+
     await _plugin.zonedSchedule(
       _digestId,
-      appState.t('Mission briefing', 'إحاطة المهام'),
-      appState.t("Open the app to review today's tasks.",
-          'افتح التطبيق لمراجعة مهام اليوم.'),
-      tz.TZDateTime.from(first, tz.local),
+      'A.Jami SOS',
+      appState.t("Open the app to see today's tasks",
+          'افتح التطبيق لتشوف مهام اليوم'),
+      at,
       _details,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
     );
   }
 
-  static Future<void> test() => _plugin.show(
-        0,
-        appState.t('Bell test', 'اختبار الجرس'),
-        appState.t('Notifications are working.', 'التنبيهات تعمل بنجاح.'),
-        _details,
-      );
+  static Future<void> test() async {
+    await init();
+    await _plugin.show(
+      0,
+      'A.Jami SOS',
+      appState.t('Test notification works', 'الإشعار التجريبي شغّال'),
+      _details,
+    );
+  }
 
-  /// يعيد جدولة كل التنبيهات (بعد إعادة التشغيل، أو تغيير الإعدادات، أو الاستعادة)
   static Future<void> resyncAll() async {
-    final db = Db.instance;
-    final tasks = await db.tasks();
-    final done = await db.completionKeys();
+    await init();
+    await _plugin.cancelAll();
+    final tasks = await Db.instance.tasks();
+    final doneKeys = await Db.instance.completionKeys();
+    final on = appState.notificationsOn;
     for (final t in tasks) {
-      await schedule(
-        t,
-        t.id!,
-        enabled: appState.notificationsOn,
-        done: done.contains(doneKey(t.id!, t.date)),
-      );
+      final id = t.id;
+      if (id == null) continue;
+      final done = t.recurrence == 'none' &&
+          doneKeys.contains(doneKey(id, dateOnly(t.date)));
+      await schedule(t, id, enabled: on, done: done);
     }
-    await digest(enabled: appState.notificationsOn && appState.morningBriefing);
+    await digest(enabled: on && appState.morningBriefing);
   }
 }
-```
-
-### `lib/services/security.dart`
-
-```dart
-import 'package:local_auth/local_auth.dart';
-import '../core/app_state.dart';
-
-final _auth = LocalAuthentication();
-
-/// true إذا نجح فتح القفل (بصمة / وجه / PIN الجهاز)
-Future<bool> unlockDevice() async {
-  try {
-    // إذا الجهاز بدون قفل شاشة ما نقدر نحمي التطبيق، فنسمح بالدخول
-    if (!await _auth.isDeviceSupported()) return true;
-    return await _auth.authenticate(
-      localizedReason: appState.t('Unlock A.Jami SOS', 'افتح تطبيق A.Jami SOS'),
-      options: const AuthenticationOptions(stickyAuth: true),
-    );
-  } catch (_) {
-    return false;
-  }
-}
-
