@@ -31,8 +31,8 @@ class Bell {
     if (_ready) return;
     tz.initializeTimeZones();
     try {
-      final name = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(name));
+       final info = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(info.identifier)); 
     } catch (_) {
       tz.setLocalLocation(tz.getLocation('UTC'));
     }
