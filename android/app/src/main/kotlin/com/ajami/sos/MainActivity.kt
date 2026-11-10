@@ -64,6 +64,25 @@ class MainActivity : FlutterFragmentActivity() {
                     WidgetActions.refreshAll(this)
                     result.success(null)
                 }
+                // Checkbox taps queued from the tasks widget.
+                "pullToggles" -> {
+                    val arr = org.json.JSONArray()
+                    for (t in WidgetData.pendingToggles(this)) {
+                        arr.put(
+                            org.json.JSONObject()
+                                .put("id", t.first)
+                                .put("day", t.second)
+                                .put("done", t.third)
+                        )
+                    }
+                    result.success(arr.toString())
+                }
+                "clearToggles" -> {
+                    getSharedPreferences("FlutterSharedPreferences", MODE_PRIVATE)
+                        .edit().remove(WidgetData.KEY_TOGGLES).apply()
+                    WidgetActions.refreshAll(this)
+                    result.success(null)
+                }
                 // Which screen the user asked for by tapping a widget.
                 "consumeAction" -> {
                     val action = pendingAction

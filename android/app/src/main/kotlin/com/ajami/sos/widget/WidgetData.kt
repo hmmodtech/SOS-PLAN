@@ -1,8 +1,6 @@
 package com.ajami.sos.widget
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.database.sqlite.SQLiteDatabase
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -10,26 +8,26 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import net.sqlcipher.database.SQLiteDatabase as CipherDatabase
 
 /**
- * Read-only access to the app's data for the home-screen widgets.
+ * Read side of the widget bridge.
  *
- * The Flutter app stores everything in an SQLCipher database
- * (`sos_secure.db`) whose password lives in flutter_secure_storage, and the
- * scheduler keeps its own plain JSON snapshot (`sos_widget.json`) on every
- * change. We read the snapshot first because it needs no key, and fall back to
- * the encrypted database (same key derivation as flutter_secure_storage) so the
- * widgets still work if the snapshot was never written.
+ * The Flutter side (lib/services/widget_bridge.dart) writes a small JSON
+ * snapshot after every change, so the widgets render instantly and safely
+ * without ever touching the encrypted database or its key.
+ *
+ * Widget writes (ticking a task, adding a memo) go into a queue in
+ * SharedPreferences and the Flutter side drains that queue into the database.
  */
 object WidgetData {
   private const val PREFS = "FlutterSharedPreferences"
   private const val SNAPSHOT = "sos_widget.json"
-  const val databaseName = "sos_secure.db"
 
+  /** Queue keys, also read by Dart. */
   const val KEY_NOTES = "flutter.sos_widget_notes"
+  const val KEY_TOGGLES = "flutter.sos_widget_toggles"
 
-  // ---------- public model ----------
+  // ---------- models ----------
 
   data class Task(
     val id: Int,
@@ -39,6 +37,7 @@ object WidgetData {
     val priority: Int,
     val isPrivate: Boolean,
     val time: String?,
+    val day: String = "",
   )
 
   data class Memo(val text: String, val day: String)
@@ -54,39 +53,36 @@ object WidgetData {
     val scheduled7: Int = 0,
     val memos: List<Memo> = emptyList(),
     val generatedAt: Long = 0,
+    val hasAppData: Boolean = false,
   ) {
     val rateToday: Int
       get() = if (scheduledToday == 0) 0 else (doneToday * 100 / scheduledToday)
-    val rate7: Int
-      get() = if (scheduled7 == 0) 0 else (done7 * 100 / scheduled7)
+    val rate7: Int get() = if (scheduled7 == 0) 0 else (done7 * 100 / scheduled7)
     val left: Int get() = (scheduledToday - doneToday).coerceAtLeast(0)
-  }
-
-  fun isArabic(context: Context): Boolean {
-    val p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-    return p.getBoolean("flutter.ar", false)
   }
 
   // ---------- loading ----------
 
   fun load(context: Context): Snapshot {
-    snapshotFile(context)?.let { file ->
-      try {
-        if (file.exists() && file.length() > 2) {
-          return parseSnapshot(JSONObject(file.readText()))
-        }
-      } catch (_: Throwable) {
-        // Corrupt snapshot: rebuild from the database below.
-      }
+    val file = snapshotFile(context) ?: return Snapshot()
+    if (!file.exists() || file.length() < 2) return Snapshot()
+    return try {
+      parseSnapshot(JSONObject(file.readText()), file.lastModified())
+    } catch (_: Throwable) {
+      Snapshot()
     }
-    return fromDatabase(context)
   }
 
-  private fun snapshotFile(context: Context): File? =
-    context.getExternalFilesDir(null)?.let { File(it, SNAPSHOT) }
-      ?: File(context.filesDir, SNAPSHOT)
+  private fun snapshotFile(context: Context): File? {
+    val ext = context.getExternalFilesDir(null)
+    if (ext != null) {
+      val f = File(ext, SNAPSHOT)
+      if (f.exists()) return f
+    }
+    return File(context.filesDir, SNAPSHOT)
+  }
 
-  private fun parseSnapshot(o: JSONObject): Snapshot {
+  private fun parseSnapshot(o: JSONObject, modified: Long): Snapshot {
     fun tasks(key: String): List<Task> {
       val arr = o.optJSONArray(key) ?: return emptyList()
       return (0 until arr.length()).mapNotNull { i ->
@@ -99,6 +95,7 @@ object WidgetData {
           priority = t.optInt("priority"),
           isPrivate = t.optBoolean("private"),
           time = t.optString("time").takeIf { it.isNotEmpty() },
+          day = t.optString("day"),
         )
       }
     }
@@ -118,166 +115,51 @@ object WidgetData {
       done7 = o.optInt("done7"),
       scheduled7 = o.optInt("scheduled7"),
       memos = memos,
-      generatedAt = o.optLong("generatedAt"),
+      generatedAt = o.optLong("generatedAt", modified),
+      hasAppData = true,
     )
   }
 
-  private class Row(val task: Task, val date: String, val recurrence: String,
-                    val remindAt: String?, val checklist: JSONArray?)
+  // ---------- queued widget actions ----------
 
-  /** Reads the encrypted database directly, mirroring lib/data/database.dart. */
-  private fun fromDatabase(context: Context): Snapshot {
-    // The SQLCipher build used by sqflite_sqlcipher ships as libsqlcipher.so.
-    try {
-      CipherDatabase.loadLibs(context)
+  /** Marks a task ticked from the launcher, waiting for the app to apply it. */
+  fun queueToggle(context: Context, taskId: Int, day: String) {
+    if (taskId < 0 || day.isEmpty()) return
+    val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    val arr = JSONArray()
+    // Collapse repeated taps on the same task/day to the final intent.
+    var pendingDone: Boolean? = null
+    val existing = pendingToggles(context)
+    for (t in existing) {
+      if (t.first == taskId && t.second == day) {
+        pendingDone = !t.third
+      } else {
+        arr.put(JSONObject().put("id", t.first).put("day", t.second).put("done", t.third))
+      }
+    }
+    // The snapshot's current value plus one flip decides the target state.
+    val current = load(context).today.firstOrNull { it.id == taskId }?.done ?: false
+    val target = pendingDone ?: !current
+    arr.put(JSONObject().put("id", taskId).put("day", day).put("done", target))
+    prefs.edit().putString(KEY_TOGGLES, arr.toString()).apply()
+  }
+
+  /** Triple of (taskId, day, done). */
+  fun pendingToggles(context: Context): List<Triple<Int, String, Boolean>> {
+    val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+      .getString(KEY_TOGGLES, null) ?: return emptyList()
+    return try {
+      val arr = JSONArray(raw)
+      (0 until arr.length()).mapNotNull { i ->
+        val o = arr.optJSONObject(i) ?: return@mapNotNull null
+        Triple(o.optInt("id"), o.optString("day"), o.optBoolean("done"))
+      }
     } catch (_: Throwable) {
-      // loadLibs is only needed once; failures fall through to the plain API.
-    }
-    val dir = context.getDatabasePath(databaseName).parentFile ?: return Snapshot()
-    val file = File(dir, databaseName)
-    if (!file.exists()) return Snapshot()
-
-    val key = secureStorageKey(context) ?: return Snapshot()
-    var db: SQLiteDatabase? = null
-    try {
-      db = CipherDatabase.openDatabase(file.absolutePath, key, null,
-        SQLiteDatabase.OPEN_READONLY)
-      val tasks = mutableListOf<Row>()
-      db.rawQuery(
-        "SELECT id,title_en,title_ar,date,remind_at,category,priority," +
-          "is_private,recurrence,checklist FROM tasks", null,
-      ).use { c ->
-        while (c.moveToNext()) {
-          val ar = isArabic(context)
-          val titleEn = c.getString(1) ?: ""
-          val titleAr = c.getString(2) ?: ""
-          val checklist = c.getString(9)?.let {
-            try { JSONArray(it) } catch (_: Throwable) { null }
-          }
-          val detail = checklist?.optJSONObject(0)?.optString("t").orEmpty()
-          tasks += Row(
-            Task(
-              id = c.getInt(0),
-              title = if (ar && titleAr.isNotEmpty()) titleAr else titleEn,
-              subtitle = detail,
-              done = false,
-              priority = c.getInt(6),
-              isPrivate = c.getInt(7) == 1,
-              time = null,
-            ),
-            date = c.getString(3) ?: "",
-            recurrence = c.getString(8) ?: "none",
-            remindAt = c.getString(4),
-            checklist = checklist,
-          )
-        }
-      }
-
-      val doneKeys = mutableSetOf<String>()
-      db.rawQuery("SELECT task_id,day FROM completions", null).use { c ->
-        while (c.moveToNext()) doneKeys += "${c.getInt(0)}|${c.getString(1)}"
-      }
-
-      return build(tasks, doneKeys)
-    } catch (_: Throwable) {
-      return Snapshot()
-    } finally {
-      try { db?.close() } catch (_: Throwable) {}
+      emptyList()
     }
   }
 
-  private fun build(rows: List<Row>, doneKeys: Set<String>): Snapshot {
-    val today = dayKey(0)
-    val yesterday = dayKey(-1)
-
-    fun occursOn(row: Row, day: Date): Boolean {
-      val start = parseDay(row.date) ?: return false
-      val d = truncate(day)
-      if (d.before(start)) return false
-      return when (row.recurrence) {
-        "daily" -> true
-        "weekly" -> dayOfWeek(d) == dayOfWeek(start)
-        "monthly" -> dayOfMonth(d) == dayOfMonth(start)
-        else -> d == start
-      }
-    }
-
-    fun isDone(row: Row, key: String) = doneKeys.contains("${row.task.id}|$key")
-
-    val todayList = mutableListOf<Task>()
-    val overdueList = mutableListOf<Task>()
-    var scheduledToday = 0
-    var doneToday = 0
-    var scheduledY = 0
-    var doneY = 0
-
-    val now = Date()
-    for (row in rows) {
-      if (occursOn(row, now)) {
-        scheduledToday++
-        val done = isDone(row, today)
-        if (done) doneToday++
-        todayList += decorate(row, done)
-      }
-      val y = addDays(now, -1)
-      if (occursOn(row, y)) {
-        scheduledY++
-        if (isDone(row, yesterday)) doneY++
-      }
-      // One-off tasks from previous days that were never completed.
-      if (row.recurrence == "none") {
-        val start = parseDay(row.date)
-        if (start != null && start.before(truncate(now)) && !doneKeys.any {
-            it.startsWith("${row.task.id}|")
-          }) {
-          overdueList += decorate(row, false)
-        }
-      }
-    }
-
-    todayList.sortWith(compareByDescending<Task> { it.priority }.thenBy { it.time ?: "99:99" })
-    overdueList.sortByDescending { it.priority }
-
-    var scheduled7 = 0
-    var done7 = 0
-    for (d in 0..6) {
-      val day = addDays(now, -d)
-      val key = dayKey(-d)
-      for (row in rows) {
-        if (!occursOn(row, day)) continue
-        scheduled7++
-        if (isDone(row, key)) done7++
-      }
-    }
-
-    return Snapshot(
-      today = todayList,
-      overdue = overdueList.take(5),
-      doneToday = doneToday,
-      scheduledToday = scheduledToday,
-      doneYesterday = doneY,
-      scheduledYesterday = scheduledY,
-      done7 = done7,
-      scheduled7 = scheduled7,
-      memos = localMemos(),
-      generatedAt = System.currentTimeMillis(),
-    )
-  }
-
-  private fun decorate(row: Row, done: Boolean): Task {
-    val sub = row.checklist?.let { arr ->
-      if (arr.length() == 0) "" else {
-        var d = 0
-        for (i in 0 until arr.length()) {
-          if (arr.optJSONObject(i)?.optBoolean("d") == true) d++
-        }
-        "$d/${arr.length()}"
-      }
-    }.orEmpty()
-    return row.task.copy(done = done, subtitle = sub, time = timeOf(row.remindAt))
-  }
-
-  /** Memos typed straight into the widget (the DB stays the single owner). */
+  /** Memos typed in the widget sheet, newest first. */
   fun localMemos(context: Context): List<Memo> {
     val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
       .getString(KEY_NOTES, null) ?: return emptyList()
@@ -293,14 +175,13 @@ object WidgetData {
   }
 
   fun saveLocalMemo(context: Context, text: String) {
-    if (text.isBlank()) return
+    val clean = text.trim()
+    if (clean.isEmpty()) return
     val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
     val arr = JSONArray()
-    val entry = JSONObject().put("text", text.trim()).put("day", dayKey(0))
-    arr.put(entry)
-    // Keep the last 20 memos only.
-    val existing = localMemos(context)
-    for (m in existing.take(19)) {
+    arr.put(JSONObject().put("text", clean).put("day", dayKey(0)))
+    // Keep the last 20 queued memos.
+    for (m in localMemos(context).take(19)) {
       arr.put(JSONObject().put("text", m.text).put("day", m.day))
     }
     prefs.edit().putString(KEY_NOTES, arr.toString()).apply()
@@ -311,86 +192,13 @@ object WidgetData {
       .edit().remove(KEY_NOTES).apply()
   }
 
-  // ---------- flutter_secure_storage key derivation ----------
-
-  /**
-   * flutter_secure_storage v9 on Android encrypts values with an AES key stored
-   * in the Android Keystore under key "flutter_secure_storage_key", and the
-   * ciphertext is base64(iv):base64(cipher). This mirrors
-   * SecureStorageCipher.decrypt so we can recover the SQLCipher password.
-   */
-  fun secureKey(context: Context): String? = secureStorageKey(context)
-
-  private fun secureStorageKey(context: Context): String? {
-    val prefs = context.getSharedPreferences(
-      "FlutterSecureStorage", Context.MODE_PRIVATE,
-    )
-    val raw = prefs.getString("sos_db_key", null) ?: return null
-    return try {
-      val parts = raw.split(":")
-      if (parts.size != 2) return raw
-      val iv = android.util.Base64.decode(parts[0], android.util.Base64.DEFAULT)
-      val data = android.util.Base64.decode(parts[1], android.util.Base64.DEFAULT)
-
-      val keystore = java.security.KeyStore.getInstance("AndroidKeyStore")
-      keystore.load(null)
-      val secretKey = keystore.getKey("flutter_secure_storage_key", null)
-        as? javax.crypto.SecretKey ?: return null
-      val cipher = javax.crypto.Cipher.getInstance("AES/CBC/PKCS7Padding")
-      cipher.init(
-        javax.crypto.Cipher.DECRYPT_MODE, secretKey,
-        javax.crypto.spec.IvParameterSpec(iv),
-      )
-      String(cipher.doFinal(data), Charsets.UTF_8)
-    } catch (_: Throwable) {
-      null
-    }
-  }
-
-  // ---------- small helpers ----------
-
-  private fun timeOf(iso: String?): String? {
-    if (iso.isNullOrEmpty()) return null
-    return try {
-      val d = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US).parse(iso.take(16))
-      SimpleDateFormat("HH:mm", Locale.US).format(d!!)
-    } catch (_: Throwable) {
-      null
-    }
-  }
-
-  fun parseDay(s: String): Date? = try {
-    truncate(SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(s.take(10))!!)
-  } catch (_: Throwable) {
-    null
-  }
-
-  private fun truncate(d: Date): Date {
-    val c = Calendar.getInstance().apply {
-      time = d
-      set(Calendar.HOUR_OF_DAY, 0)
-      set(Calendar.MINUTE, 0)
-      set(Calendar.SECOND, 0)
-      set(Calendar.MILLISECOND, 0)
-    }
-    return c.time
-  }
-
-  private fun addDays(d: Date, n: Int): Date {
-    val c = Calendar.getInstance().apply { time = d; add(Calendar.DAY_OF_YEAR, n) }
-    return c.time
-  }
+  // ---------- helpers ----------
 
   fun dayKey(offset: Int): String =
     SimpleDateFormat("yyyy-MM-dd", Locale.US).format(addDays(Date(), offset))
 
-  private fun dayOfWeek(d: Date): Int {
-    val c = Calendar.getInstance().apply { time = d }
-    return c.get(Calendar.DAY_OF_WEEK)
-  }
-
-  private fun dayOfMonth(d: Date): Int {
-    val c = Calendar.getInstance().apply { time = d }
-    return c.get(Calendar.DAY_OF_MONTH)
+  private fun addDays(d: Date, n: Int): Date {
+    val c = Calendar.getInstance().apply { time = d; add(Calendar.DAY_OF_YEAR, n) }
+    return c.time
   }
 }

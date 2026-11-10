@@ -121,7 +121,7 @@ class TasksWidgetProvider : AppWidgetProvider() {
         // Tap the checkbox: toggle without leaving the launcher.
         row.setOnClickPendingIntent(
           R.id.row_check,
-          toggleIntent(context, task.id, todayKey),
+          toggleIntent(context, task.id, task.day.ifEmpty { todayKey }),
         )
         views.addView(R.id.w_rows, row)
       }

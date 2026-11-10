@@ -43,6 +43,37 @@ class WidgetBridge {
     }
   }
 
+  /// يطبّق ما فعله المستخدم على الودجت: تعليم مهام + ميمو جديدة.
+  /// يُستدعى عند فتح التطبيق وبعد كل أمر من الودجت.
+  static Future<int> applyPending() async {
+    var applied = 0;
+    try {
+      final rawToggles = await _channel.invokeMethod<String>('pullToggles');
+      if (rawToggles != null && rawToggles.isNotEmpty) {
+        final list = jsonDecode(rawToggles);
+        if (list is List) {
+          for (final item in list) {
+            if (item is! Map) continue;
+            final id = item['id'];
+            final day = item['day'];
+            final done = item['done'];
+            if (id is! int || day is! String || done is! bool) continue;
+            final when = DateTime.tryParse(day);
+            if (when == null) continue;
+            await Db.instance.setDone(id, when, done);
+            applied++;
+          }
+          await _channel.invokeMethod<void>('clearToggles');
+        }
+      }
+      applied += await pullWidgetMemos();
+    } catch (e) {
+      logWidget('apply: $e');
+    }
+    if (applied > 0) await sync();
+    return applied;
+  }
+
   /// يقرأ الميمو المكتوبة من الودجت ويحفظها في قاعدة البيانات.
   static Future<int> pullWidgetMemos() async {
     try {
@@ -115,6 +146,7 @@ class WidgetBridge {
             ? ''
             : '${t.remindAt!.hour.toString().padLeft(2, '0')}:'
                 '${t.remindAt!.minute.toString().padLeft(2, '0')}',
+        'day': dayKey(day),
       };
     }
 

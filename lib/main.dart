@@ -112,7 +112,7 @@ class _BootGateState extends State<BootGate> {
       // Move memos typed on the home-screen widget into the database, then
       // publish a fresh snapshot for the widgets.
       unawaited(_step('widgets', () async {
-        await WidgetBridge.pullWidgetMemos();
+        await WidgetBridge.applyPending();
         await WidgetBridge.sync();
       }));
       if (!mounted) return;

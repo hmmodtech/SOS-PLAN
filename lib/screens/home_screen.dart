@@ -22,7 +22,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with WidgetsBindingObserver {
   final _memo = TextEditingController();
   DateTime _focused = DateTime.now();
   DateTime _selected = dateOnly(DateTime.now());
@@ -33,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _load();
     // Widget taps: the + button opens the new-task form, and memo taps pull
     // whatever was typed on the home screen into the database.
@@ -42,14 +44,25 @@ class _HomeScreenState extends State<HomeScreen> {
         if (mounted) await _openForm();
       },
       onMemos: () async {
-        await WidgetBridge.pullWidgetMemos();
+        await WidgetBridge.applyPending();
         if (mounted) await _load();
       },
     );
   }
 
+  // The launcher can queue taps while we are in the background.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      WidgetBridge.applyPending().then((_) {
+        if (mounted) _load();
+      });
+    }
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _memo.dispose();
     super.dispose();
   }

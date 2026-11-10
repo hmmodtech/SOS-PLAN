@@ -71,9 +71,4 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
-
-    // Home-screen widgets read the app's SQLCipher database directly so they
-    // work while the app is closed. sqflite_sqlcipher bundles this same
-    // library, so no extra native code is shipped.
-    implementation("net.zetetic:android-database-sqlcipher:4.5.4")
 }
