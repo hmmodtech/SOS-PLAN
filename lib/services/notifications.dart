@@ -3,6 +3,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import '../core/app_state.dart';
+import '../core/theme.dart';
 import '../data/database.dart';
 import '../data/models.dart';
 
