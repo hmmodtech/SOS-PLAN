@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -8,7 +10,7 @@ plugins {
 // Optional release signing. Put key.properties in android/ if you have a keystore.
 // Without it, the release APK is signed with the debug key (fine for personal use).
 val keystorePropertiesFile: File = rootProject.file("key.properties")
-val keystoreProperties = java.util.Properties()
+val keystoreProperties = Properties()
 var hasKeystore = false
 if (keystorePropertiesFile.exists()) {
     keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
