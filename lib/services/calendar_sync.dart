@@ -1,4 +1,4 @@
-```dart
+
 import 'dart:convert';
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
@@ -175,4 +175,4 @@ class MsCal {
     return items.length;
   }
 }
-```
+
