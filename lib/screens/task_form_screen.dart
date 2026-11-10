@@ -145,7 +145,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
       final text = line.replaceFirst(RegExp(r'^\[(x| )\]\s*'), '');
       // keep previous done state if the item was already there at this position
       final keepDone = i < old.length && old[i].text == text ? old[i].done : done;
-      result.add(CheckItem(text: text, done: keepDone));
+      result.add(CheckItem(text, done: keepDone));
       i++;
     }
     return result;
