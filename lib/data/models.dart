@@ -14,6 +14,16 @@ DateTime dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 bool sameDay(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;
 
+/// قراءة نص محفوظ في قاعدة البيانات بلا انفجار عند القيمة الفارغة.
+/// (كل الحقول النصية في الجداول قابلة لأن تكون NULL.)
+String _text(Object? v) => (v as String?) ?? '';
+
+/// أرقام SQLite قد تُعاد كـ int أو num حسب المنصّة.
+int _int(Object? v, [int fallback = 0]) =>
+    v is int ? v : (v is num ? v.toInt() : fallback);
+
+DateTime _date(Object? v) => DateTime.parse(_text(v));
+
 /// مفتاح إنجاز مهمة في يوم محدد (كل يوم في المهمة المتكررة له حالة مستقلة)
 String doneKey(int taskId, DateTime day) => '$taskId|${dayKey(day)}';
 
@@ -30,9 +40,20 @@ class CheckItem {
 
 List<CheckItem> _parseChecklist(String? raw) {
   if (raw == null || raw.isEmpty) return const [];
-  return (jsonDecode(raw) as List)
-      .map((e) => CheckItem.fromJson(e as Map<String, dynamic>))
-      .toList();
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is! List) return const [];
+    return decoded
+        .whereType<Map>()
+        .map((e) => CheckItem(
+              (e['t'] as String?) ?? '',
+              done: e['d'] == true,
+            ))
+        .toList();
+  } catch (_) {
+    // Corrupt JSON must not crash the list screen.
+    return const [];
+  }
 }
 
 class Task {
@@ -111,24 +132,24 @@ class Task {
       };
 
   factory Task.fromMap(Map<String, Object?> m) => Task(
-        id: m['id'] as int,
-        titleEn: m['title_en'] as String,
-        titleAr: (m['title_ar'] as String?) ?? '',
-        detailsEn: (m['details_en'] as String?) ?? '',
-        detailsAr: (m['details_ar'] as String?) ?? '',
-        date: DateTime.parse(m['date'] as String),
-        remindAt: m['remind_at'] == null
-            ? null
-            : DateTime.parse(m['remind_at'] as String),
-        category: m['category'] as String,
-        priority: m['priority'] as int,
-        isPrivate: m['is_private'] == 1,
-        recurrence: m['recurrence'] as String,
+        id: _int(m['id']),
+        titleEn: _text(m['title_en']),
+        titleAr: _text(m['title_ar']),
+        detailsEn: _text(m['details_en']),
+        detailsAr: _text(m['details_ar']),
+        date: _date(m['date']),
+        remindAt: m['remind_at'] == null ? null : _date(m['remind_at']),
+        category: m['category'] == null ? 'general' : _text(m['category']),
+        priority: _int(m['priority'], 1),
+        isPrivate: _int(m['is_private']) == 1,
+        recurrence: m['recurrence'] == null ? 'none' : _text(m['recurrence']),
         checklist: _parseChecklist(m['checklist'] as String?),
-        isMission: m['is_mission'] == 1,
+        isMission: _int(m['is_mission']) == 1,
         googleId: m['google_id'] as String?,
         msId: m['ms_id'] as String?,
-        updatedAt: DateTime.parse(m['updated_at'] as String),
+        updatedAt: m['updated_at'] == null
+            ? DateTime.now()
+            : _date(m['updated_at']),
       );
 }
 
@@ -139,9 +160,9 @@ class Note {
   const Note({required this.id, required this.day, required this.text});
 
   factory Note.fromMap(Map<String, Object?> m) => Note(
-        id: m['id'] as int,
-        day: DateTime.parse(m['day'] as String),
-        text: m['text'] as String,
+        id: _int(m['id']),
+        day: _date(m['day']),
+        text: _text(m['text']),
       );
 }
 
