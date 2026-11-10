@@ -33,9 +33,6 @@ class CheckItem {
   const CheckItem(this.text, {this.done = false});
 
   Map<String, dynamic> toJson() => {'t': text, 'd': done};
-
-  factory CheckItem.fromJson(Map<String, dynamic> m) =>
-      CheckItem(m['t'] as String, done: m['d'] as bool);
 }
 
 List<CheckItem> _parseChecklist(String? raw) {

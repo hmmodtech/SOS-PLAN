@@ -97,6 +97,8 @@ class Bell {
         _details,
         androidScheduleMode: _mode,
         matchDateTimeComponents: match,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
         payload: 'task:$id',
       );
     } catch (e) {
@@ -130,6 +132,8 @@ class Bell {
         _details,
         androidScheduleMode: _mode,
         matchDateTimeComponents: DateTimeComponents.time,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
         payload: 'digest',
       );
     } catch (e) {
