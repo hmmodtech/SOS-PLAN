@@ -9,34 +9,36 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
-  intl: any
-  shared_preferences: any
-  path: any
-  path_provider: any
-  http: any
+  intl: ^0.20.2
+  shared_preferences: ^2.3.2
+  path: ^1.9.0
+  path_provider: ^2.1.4
+  http: ^1.2.2
 
-  sqflite_sqlcipher: any
-  flutter_secure_storage: any
-  local_auth: any
-  speech_to_text: any
-  share_plus: any
-  file_picker: any
-  table_calendar: any
+  sqflite_sqlcipher: ^3.1.0
+  flutter_secure_storage: ^9.2.2
+  local_auth: ^2.2.0
+  speech_to_text: ^7.0.0
+  share_plus: ^10.1.2
+  file_picker: ^8.1.2
+  table_calendar: ^3.1.2
 
-  flutter_local_notifications: any
-  timezone: any
-  flutter_timezone: any
+  flutter_local_notifications: ^17.2.4
+  timezone: ^0.9.4
+  flutter_timezone: ^2.1.0
 
-  google_sign_in: any
-  googleapis: any
-  extension_google_sign_in_as_googleapis_auth: any
-  flutter_appauth: any
+  google_sign_in: ^6.2.1
+  googleapis: ^13.2.0
+  extension_google_sign_in_as_googleapis_auth: ^2.0.0
+  flutter_appauth: ^6.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: any
+  flutter_lints: ^4.0.0
 
 flutter:
   uses-material-design: true
