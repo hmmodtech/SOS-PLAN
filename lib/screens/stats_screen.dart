@@ -205,8 +205,7 @@ class _StatsScreenState extends State<StatsScreen> {
                   GlowBar(
                     value: e.value[0] == 0 ? 0 : e.value[1] / e.value[0],
                     color: catColor(e.key),
-                    backgroundColor: kDimGreen.withAlpha(51),
-                    minHeight: 4,
+                    height: 4,
                   ),
                 ],
               ),

@@ -178,18 +178,16 @@ class _Splash extends StatelessWidget {
           children: [
             const Icon(Icons.shield_outlined, color: kGreen, size: 64),
             const SizedBox(height: 20),
-            SizedBox(
-              width: 120,
-              child: LinearProgressIndicator(
-                minHeight: 2,
-                color: kGreen,
-                backgroundColor: kGreen.withAlpha(40),
-              ),
-            ),
+            const SizedBox(width: 120, child: GlowBar(value: 0.6, height: 3)),
             const SizedBox(height: 14),
             Text(
               'A.Jami SOS',
-              style: TextStyle(color: kGreen.withAlpha(180), letterSpacing: 2),
+              style: const TextStyle(
+                color: kGreen,
+                letterSpacing: 3,
+                fontWeight: FontWeight.w700,
+                shadows: kTextBloom,
+              ),
             ),
           ],
         ),
