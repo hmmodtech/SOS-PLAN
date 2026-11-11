@@ -347,7 +347,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF04120A),
+        backgroundColor: kSurface,
         title: Text(s('Startup log', 'سجل بدء التشغيل'),
             style: const TextStyle(color: kGreen, fontSize: 16)),
         content: SizedBox(

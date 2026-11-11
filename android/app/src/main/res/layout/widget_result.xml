@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Result widget: today's / yesterday's / weekly completion rate + progress -->
+<!-- Result widget: HUD-style neon percentage + glowing progress bar -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
@@ -7,6 +7,13 @@
     android:orientation="vertical"
     android:padding="14dp"
     android:background="@drawable/widget_bg">
+
+    <!-- Accent rule: aqua → cyan-green glow -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/widget_glow_line" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -22,6 +29,7 @@
             android:textColor="@color/widget_green"
             android:textSize="12sp"
             android:textStyle="bold"
+            android:letterSpacing="0.06"
             android:maxLines="1"
             android:ellipsize="end" />
 
@@ -35,38 +43,56 @@
             android:background="?android:attr/selectableItemBackgroundBorderless" />
     </LinearLayout>
 
-    <!-- Big today percentage -->
+    <!-- Big percentage with a soft bloom behind it -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="4dp">
+        android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/w_big"
+        <FrameLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0%"
-            android:textColor="@color/widget_green"
-            android:textSize="40sp"
-            android:textStyle="bold" />
+            android:layout_height="wrap_content">
+
+            <!-- Neon halo -->
+            <View
+                android:layout_width="118dp"
+                android:layout_height="86dp"
+                android:layout_gravity="center"
+                android:background="@drawable/widget_halo" />
+
+            <TextView
+                android:id="@+id/w_big"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="0%"
+                android:textColor="@color/widget_mint"
+                android:textSize="40sp"
+                android:textStyle="bold"
+                android:letterSpacing="-0.02"
+                android:shadowColor="@color/widget_green"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="18" />
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="10dp"
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/w_big_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/widget_today"
-                android:textColor="@color/widget_muted"
-                android:textSize="11sp" />
+                android:textColor="@color/widget_muted_green"
+                android:textSize="10sp"
+                android:letterSpacing="0.12"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/w_count"
@@ -80,12 +106,11 @@
                 android:id="@+id/w_bar"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
-                android:layout_height="6dp"
+                android:layout_height="8dp"
                 android:layout_marginTop="6dp"
                 android:max="100"
                 android:progress="0"
-                android:progressTint="@color/widget_green"
-                android:progressBackgroundTint="@color/widget_border" />
+                android:progressDrawable="@drawable/widget_progress" />
         </LinearLayout>
     </LinearLayout>
 
@@ -107,15 +132,20 @@
                 android:layout_height="wrap_content"
                 android:text="@string/widget_yesterday"
                 android:textColor="@color/widget_muted"
-                android:textSize="10sp" />
+                android:textSize="10sp"
+                android:letterSpacing="0.08" />
 
             <TextView
                 android:id="@+id/w_yesterday"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/widget_dim"
+                android:textColor="@color/widget_aqua"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:shadowColor="@color/widget_aqua"
+                android:shadowRadius="10"
+                android:shadowDx="0"
+                android:shadowDy="0" />
         </LinearLayout>
 
         <LinearLayout
@@ -129,7 +159,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/widget_week"
                 android:textColor="@color/widget_muted"
-                android:textSize="10sp" />
+                android:textSize="10sp"
+                android:letterSpacing="0.08" />
 
             <TextView
                 android:id="@+id/w_week"
@@ -137,7 +168,11 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/widget_green"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:shadowColor="@color/widget_green"
+                android:shadowRadius="10"
+                android:shadowDx="0"
+                android:shadowDy="0" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

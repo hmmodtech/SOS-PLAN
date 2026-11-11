@@ -17,6 +17,16 @@ const Duration _frame = Duration(milliseconds: 160);
 const String _glyphs =
     'ｱｲｳｴｵｶｷｸｹｺﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉ0123456789ABCDEFZ';
 
+/// Tail colours: bright cyan-green nearest the head → aqua → deep teal.
+final List<Color> _tailColors = List<Color>.generate(_trail, (k) {
+  final t = k / _trail; // 0 = head, 1 = end of the trail
+  final alpha = (215 * (1 - t)).round().clamp(0, 255);
+  final base = t < 0.5
+      ? Color.lerp(kGreen, kAqua, t * 2)!
+      : Color.lerp(kAqua, kDimGreen, (t - 0.5) * 2)!;
+  return base.withAlpha(alpha);
+});
+
 class MatrixRain extends StatefulWidget {
   const MatrixRain({super.key});
 
@@ -128,13 +138,17 @@ class _RainPainter extends CustomPainter {
         final y = row * _cell;
         if (y > size.height) break;
         final glyph = _glyphs[(c * 7 + row * 3 + tick) % _glyphs.length];
+        // Head is white-hot, the tail fades through cyan-green into aqua,
+        // matching the app's neon glow gradient.
+        final tint = _tailColors[k];
         painter.text = TextSpan(
           text: glyph,
           style: TextStyle(
-            color: k == 0
-                ? Colors.white
-                : kGreen.withAlpha((200 * (1 - k / _trail)).round()),
+            color: k == 0 ? const Color(0xFFE8FFFA) : tint,
             fontSize: 11,
+            shadows: k == 0
+                ? const [Shadow(color: kGreen, blurRadius: 8)]
+                : null,
           ),
         );
         painter.layout();

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'core/app_state.dart';
@@ -27,6 +28,15 @@ void main() {
     logBoot('Uncaught: $error');
     return true; // handled: keep the app alive
   };
+
+  // Dark status/navigation bars to match the midnight-blue HUD.
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
+    systemNavigationBarColor: kBlack,
+    systemNavigationBarIconBrightness: Brightness.light,
+  ));
 
   // Never await anything before runApp(): a single failing plugin call there
   // leaves the user on a black screen and Android reports "not responding".
@@ -60,7 +70,15 @@ class SosApp extends StatelessWidget {
               Positioned.fill(
                 child: appState.matrixRain
                     ? const MatrixRain()
-                    : const ColoredBox(color: kBlack),
+                    : const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: RadialGradient(
+                            center: Alignment.topCenter,
+                            radius: 1.2,
+                            colors: [Color(0xFF0A1830), kBlack],
+                          ),
+                        ),
+                      ),
               ),
               AppGate(child: child!),
             ],

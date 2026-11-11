@@ -29,6 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/widget_text"
+            android:letterSpacing="0.01"
             android:textSize="12sp"
             android:maxLines="1"
             android:ellipsize="end" />

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Underline / accent rule with the aqua → cyan-green glow gradient -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:angle="0"
+        android:startColor="@color/widget_aqua"
+        android:centerColor="@color/widget_green"
+        android:endColor="@color/widget_mint"
+        android:type="linear" />
+    <corners android:radius="2dp" />
+</shape>

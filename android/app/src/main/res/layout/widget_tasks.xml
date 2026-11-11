@@ -8,6 +8,13 @@
     android:padding="12dp"
     android:background="@drawable/widget_bg">
 
+    <!-- Accent rule: aqua → cyan-green glow -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/widget_glow_line" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,6 +30,7 @@
             android:textColor="@color/widget_green"
             android:textSize="12sp"
             android:textStyle="bold"
+            android:letterSpacing="0.06"
             android:maxLines="1"
             android:ellipsize="end" />
 
@@ -30,7 +38,7 @@
             android:id="@+id/w_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/widget_dim"
+            android:textColor="@color/widget_muted_green"
             android:textSize="11sp" />
 
         <ImageView

@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Matches lib/core/theme.dart -->
-    <color name="widget_bg">#000803</color>
-    <color name="widget_bg_card">#031A08</color>
-    <color name="widget_green">#00FF41</color>
-    <color name="widget_dim">#00B32C</color>
-    <color name="widget_red">#FF3B3B</color>
-    <color name="widget_amber">#E8C84A</color>
-    <color name="widget_text">#E6FFF0</color>
-    <color name="widget_muted">#7FA88B</color>
-    <color name="widget_border">#1F5C33</color>
+    <!-- Sci-Fi HUD palette — mirrors lib/core/theme.dart -->
 
-    <!-- Same icon as the app: usable as notification/companion small icon -->
+    <!-- 1. Backgrounds & dark tones -->
+    <color name="widget_bg">#04070F</color>          <!-- midnight blue -->
+    <color name="widget_bg_card">#0A1424</color>     <!-- navy panel -->
+    <color name="widget_border">#1B3A55</color>      <!-- dark petrol -->
+    <color name="widget_track">#12283D</color>       <!-- bar track -->
+
+    <!-- 2. Glow & signal colours -->
+    <color name="widget_green">#25F4C8</color>       <!-- neon cyan-green -->
+    <color name="widget_aqua">#38BDF8</color>        <!-- aqua blue -->
+    <color name="widget_dim">#14B8CE</color>         <!-- teal (was dim green) -->
+    <color name="widget_mint">#B6FFE9</color>        <!-- pale mint highlight -->
+
+    <!-- 3. Secondary text -->
+    <color name="widget_text">#D7E6F5</color>        <!-- primary body text -->
+    <color name="widget_muted">#7C8FAB</color>       <!-- muted gray-blue -->
+    <color name="widget_muted_green">#6E9E8F</color> <!-- desaturated green -->
+
+    <color name="widget_red">#FF5470</color>
+    <color name="widget_amber">#FFC15E</color>
     <color name="widget_transparent">#00000000</color>
 </resources>
