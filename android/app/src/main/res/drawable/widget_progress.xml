@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Glowing cyan-green progress bar: halo layer under the aqua→cyan fill -->
+<!-- Glowing progress: translucent track + aqua→cyan-green→mint fill -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@android:id/background">
         <shape android:shape="rectangle">
-            <solid android:color="@color/widget_track" />
+            <solid android:color="#8012283D" />
             <corners android:radius="6dp" />
         </shape>
     </item>
-    <!-- Soft bloom behind the filled part (semi-transparent, slightly taller) -->
     <item android:id="@android:id/progress">
         <shape android:shape="rectangle">
             <corners android:radius="6dp" />
             <gradient
                 android:angle="0"
-                android:startColor="@color/widget_aqua"
-                android:centerColor="@color/widget_green"
-                android:endColor="@color/widget_mint"
+                android:startColor="#FF38BDF8"
+                android:centerColor="#FF25F4C8"
+                android:endColor="#FFB6FFE9"
                 android:type="linear" />
         </shape>
     </item>

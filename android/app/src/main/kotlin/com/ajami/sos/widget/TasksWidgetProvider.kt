@@ -43,6 +43,10 @@ class TasksWidgetProvider : AppWidgetProvider() {
   }
 
   companion object {
+    /** Muted gray-blue for finished tasks, bright text otherwise. */
+    private const val DONE_TEXT = 0xFF7C8FAB.toInt()
+    private const val ACTIVE_TEXT = 0xFFD7E6F5.toInt()
+
     fun refresh(context: Context) {
       val manager = AppWidgetManager.getInstance(context)
       val ids = manager.getAppWidgetIds(
@@ -73,21 +77,18 @@ class TasksWidgetProvider : AppWidgetProvider() {
         row.setTextViewText(R.id.row_title, task.title)
         row.setImageViewResource(
           R.id.row_check,
-          if (task.done) android.R.drawable.checkbox_on_background
-          else android.R.drawable.checkbox_off_background,
+          if (task.done) R.drawable.widget_check_on
+          else R.drawable.widget_check_off,
         )
-        row.setInt(
-          R.id.row_title, "setPaintFlags",
-          if (task.done) {
-            android.graphics.Paint.ANTI_ALIAS_FLAG or
-              android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
-          } else {
-            android.graphics.Paint.ANTI_ALIAS_FLAG
-          },
+        // setInt uses reflection and is unnecessary here: the row reports its
+        // state through a tinted title and the checkbox artwork instead.
+        row.setTextColor(
+          R.id.row_title,
+          if (task.done) DONE_TEXT else ACTIVE_TEXT,
         )
-        row.setInt(
-          R.id.row_title, "setTextColor",
-          if (task.done) 0xFF7FA88B.toInt() else 0xFFE6FFF0.toInt(),
+        row.setViewVisibility(
+          R.id.row_strike,
+          if (task.done) android.view.View.VISIBLE else android.view.View.GONE,
         )
 
         val sub = buildString {

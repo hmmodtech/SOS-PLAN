@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Checked: neon cyan-green rounded box with a dark check mark -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/widget_green" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+    <item
+        android:drawable="@android:drawable/checkbox_on_background"
+        android:gravity="center" />
+</layer-list>
