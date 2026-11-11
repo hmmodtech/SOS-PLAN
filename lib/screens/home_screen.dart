@@ -9,7 +9,9 @@ import '../core/theme.dart';
 import '../data/database.dart';
 import '../data/models.dart';
 import '../services/notifications.dart';
+import '../services/widget_bridge.dart';
 import 'search_screen.dart';
+import 'stats_screen.dart';
 import 'settings_screen.dart';
 import 'task_form_screen.dart';
 
@@ -20,7 +22,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with WidgetsBindingObserver {
   final _memo = TextEditingController();
   DateTime _focused = DateTime.now();
   DateTime _selected = dateOnly(DateTime.now());
@@ -31,11 +34,35 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _load();
+    // Widget taps: the + button opens the new-task form, and memo taps pull
+    // whatever was typed on the home screen into the database.
+    WidgetBridge.listen(
+      onNewTask: () async {
+        _load();
+        if (mounted) await _openForm();
+      },
+      onMemos: () async {
+        await WidgetBridge.applyPending();
+        if (mounted) await _load();
+      },
+    );
+  }
+
+  // The launcher can queue taps while we are in the background.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      WidgetBridge.applyPending().then((_) {
+        if (mounted) _load();
+      });
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _memo.dispose();
     super.dispose();
   }
@@ -51,6 +78,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _done = done;
       _notes = notes;
     });
+    // Keep the home-screen widgets in step with every change made here.
+    WidgetBridge.sync();
   }
 
   List<Task> _tasksOn(DateTime d) =>
@@ -93,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF031A08),
+        backgroundColor: kSurface,
         content: Text(msg),
         actions: [
           TextButton(
@@ -162,12 +191,13 @@ class _HomeScreenState extends State<HomeScreen> {
   // ---------- UI helpers ----------
   Widget _section(String s) => Padding(
         padding: const EdgeInsets.fromLTRB(4, 14, 4, 6),
-        child: Text(s,
-            style: const TextStyle(
-                color: kGreen,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.2,
-                fontSize: 12)),
+        child: Row(
+          children: [
+            Container(width: 3, height: 12, color: kGreen),
+            const SizedBox(width: 7),
+            SectionLabel(s),
+          ],
+        ),
       );
 
   Widget _chip(String text, Color c) => Container(
@@ -317,6 +347,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: const Icon(Icons.shield_outlined, color: kRed),
                 onPressed: () => s.setPanic(true),
               ),
+              IconButton(
+                tooltip: s.t('Result', 'النتيجة'),
+                icon: const Icon(Icons.insights_outlined),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const StatsScreen()),
+                ),
+              ),
               IconButton(icon: const Icon(Icons.search), onPressed: _search),
               TextButton(
                 onPressed: () => s.setArabic(!ar),
@@ -333,13 +371,23 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          floatingActionButton: FloatingActionButton.extended(
-            backgroundColor: kGreen,
-            foregroundColor: Colors.black,
-            onPressed: () => _openForm(),
-            icon: const Icon(Icons.add),
-            label: Text(s.t('NEW TASK', 'مهمة جديدة'),
-                style: const TextStyle(fontWeight: FontWeight.w900)),
+          floatingActionButton: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: const [
+                BoxShadow(color: Color(0x8825F4C8), blurRadius: 20, spreadRadius: 1),
+                BoxShadow(color: Color(0x4438BDF8), blurRadius: 34, spreadRadius: 2),
+              ],
+            ),
+            child: FloatingActionButton.extended(
+              backgroundColor: kGreen,
+              foregroundColor: kBlack,
+              elevation: 0,
+              onPressed: () => _openForm(),
+              icon: const Icon(Icons.add),
+              label: Text(s.t('NEW TASK', 'مهمة جديدة'),
+                  style: const TextStyle(fontWeight: FontWeight.w900)),
+            ),
           ),
           body: ListView(
             padding: const EdgeInsets.fromLTRB(10, 4, 10, 100),
@@ -374,27 +422,35 @@ class _HomeScreenState extends State<HomeScreen> {
                     rightChevronIcon: Icon(Icons.chevron_right, color: kGreen),
                   ),
                   daysOfWeekStyle: const DaysOfWeekStyle(
-                    weekdayStyle: TextStyle(color: Colors.white54),
-                    weekendStyle: TextStyle(color: kDimGreen),
+                    weekdayStyle: TextStyle(color: kMuted, fontSize: 11),
+                    weekendStyle: TextStyle(color: kMutedGreen, fontSize: 11),
                   ),
                   calendarStyle: CalendarStyle(
                     outsideDaysVisible: false,
-                    defaultTextStyle: const TextStyle(color: Colors.white70),
-                    weekendTextStyle: TextStyle(color: kDimGreen.withAlpha(170)),
+                    defaultTextStyle: const TextStyle(color: Color(0xFFD7E6F5)),
+                    weekendTextStyle: const TextStyle(color: kMuted),
                     selectedDecoration: BoxDecoration(
-                      color: kGreen.withAlpha(60),
+                      color: kGreen.withAlpha(45),
                       shape: BoxShape.circle,
-                      border: Border.all(color: kGreen),
+                      border: Border.all(color: kGreen, width: 1.6),
+                      boxShadow: const [
+                        BoxShadow(color: Color(0x8825F4C8), blurRadius: 14),
+                      ],
                     ),
                     selectedTextStyle: const TextStyle(
-                        color: kGreen, fontWeight: FontWeight.bold),
+                        color: Color(0xFFE8FFFA),
+                        fontWeight: FontWeight.bold,
+                        shadows: kTextBloom),
                     todayDecoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: kDimGreen),
+                      border: Border.all(color: kAqua.withAlpha(180)),
                     ),
-                    todayTextStyle: const TextStyle(color: kGreen),
+                    todayTextStyle: const TextStyle(color: kAqua),
                     markerDecoration: const BoxDecoration(
-                        color: kGreen, shape: BoxShape.circle),
+                      color: kGreen,
+                      shape: BoxShape.circle,
+                      boxShadow: [BoxShadow(color: Color(0xAA25F4C8), blurRadius: 8)],
+                    ),
                   ),
                 ),
               ),

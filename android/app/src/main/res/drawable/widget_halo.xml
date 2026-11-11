@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Soft neon bloom behind the hero number (more transparent than before) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <gradient
+        android:type="radial"
+        android:gradientRadius="50%p"
+        android:centerX="0.5"
+        android:centerY="0.5"
+        android:startColor="#6625F4C8"
+        android:centerColor="#2E38BDF8"
+        android:endColor="#0004070F" />
+</shape>

@@ -1,12 +1,14 @@
 import 'stats_screen.dart';
 import 'package:flutter/material.dart';
 import '../core/app_state.dart';
+import '../core/boot_log.dart';
 import '../core/theme.dart';
 import '../data/database.dart';
 import '../data/models.dart';
 import '../services/calendar_sync.dart';
 import '../services/export.dart';
 import '../services/notifications.dart';
+import '../services/widget_bridge.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -159,6 +161,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       setState(() {
                         appState.setArabic(v);
                       });
+                      WidgetBridge.sync();
                     },
                   )),
 
@@ -303,12 +306,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       return s('Backup restored', 'تمت استعادة النسخة الاحتياطية');
                     }),
                   )),
+                  _header(s('Diagnostics', 'التشخيص')),
+                  _card(ListTile(
+                    leading: const Icon(Icons.bug_report_outlined, color: kGreen),
+                    title: Text(s('Startup log', 'سجل بدء التشغيل')),
+                    subtitle: Text(
+                      bootLog.isEmpty
+                          ? s('No problems recorded', 'لا توجد مشاكل مسجّلة')
+                          : s('${bootLog.length} entry(s)', '${bootLog.length} سجل'),
+                      style: const TextStyle(color: Colors.white54, fontSize: 12),
+                    ),
+                    trailing: const Icon(Icons.chevron_right, color: Colors.white38),
+                    onTap: () => _showLog(),
+                  )),
+                  _card(ListTile(
+                    leading: const Icon(Icons.restart_alt, color: kGreen),
+                    title: Text(s('Re-apply reminders', 'إعادة ضبط الإشعارات')),
+                    subtitle: Text(
+                      s('Run if bells stop arriving', 'شغّلها إذا توقفت الإشعارات'),
+                      style: const TextStyle(color: Colors.white54, fontSize: 12),
+                    ),
+                    onTap: () => _run(() async {
+                      await Bell.resyncAll();
+                      return s('Reminders re-applied', 'تمت إعادة ضبط الإشعارات');
+                    }),
+                  )),
                   const SizedBox(height: 32),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Shows the startup/plugin errors on the device, so a failure can be
+  /// reported without needing a computer attached.
+  void _showLog() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: kSurface,
+        title: Text(s('Startup log', 'سجل بدء التشغيل'),
+            style: const TextStyle(color: kGreen, fontSize: 16)),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: SelectableText(
+              bootLog.isEmpty
+                  ? s('Everything started cleanly.', 'كل شيء بدأ بدون أخطاء.')
+                  : bootLog.join('\n\n'),
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
+            ),
+          ),
+        ),
+        actions: [
+          if (bootLog.isNotEmpty)
+            TextButton(
+              onPressed: () {
+                bootLog.clear();
+                Navigator.of(ctx).pop();
+                setState(() {});
+              },
+              child: Text(s('Clear', 'مسح')),
+            ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(s('Close', 'إغلاق')),
+          ),
+        ],
       ),
     );
   }

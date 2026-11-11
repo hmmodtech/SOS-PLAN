@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+  pull_request:
 
 jobs:
   build:
@@ -22,173 +23,10 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: '3.35.0'
+          # Any 3.35.x+ is fine. Pin the channel (not an exact patch) so the
+          # wrapper/Gradle versions never drift out of Flutter's supported range.
+          flutter-version: '3.35.x'
           cache: true
-
-      - name: Rebuild Android project from Flutter template and apply our settings
-        run: |
-          rm -rf android
-          flutter create --platforms=android --org com.ajami --project-name sos .
-          mkdir -p android/app/src/main/kotlin/com/ajami/sos
-          cat > android/app/src/main/kotlin/com/ajami/sos/MainActivity.kt <<'EOF'
-          package com.ajami.sos
-
-          import android.os.Bundle
-          import android.view.WindowManager
-          import io.flutter.embedding.android.FlutterFragmentActivity
-
-          // FlutterFragmentActivity is required by local_auth (biometric prompt).
-          class MainActivity : FlutterFragmentActivity() {
-              override fun onCreate(savedInstanceState: Bundle?) {
-                  super.onCreate(savedInstanceState)
-                  // Blocks screenshots and blank recent-app thumbnails.
-                  window.setFlags(
-                      WindowManager.LayoutParams.FLAG_SECURE,
-                      WindowManager.LayoutParams.FLAG_SECURE
-                  )
-              }
-          }
-          EOF
-          cat > android/app/src/main/AndroidManifest.xml <<'EOF'
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
-              <uses-permission android:name="android.permission.INTERNET" />
-              <uses-permission android:name="android.permission.RECORD_AUDIO" />
-              <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-              <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-              <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-              <uses-permission android:name="android.permission.VIBRATE" />
-              <uses-permission android:name="android.permission.WAKE_LOCK" />
-              <uses-permission android:name="android.permission.USE_BIOMETRIC" />
-              <uses-permission
-                  android:name="android.permission.USE_FINGERPRINT"
-                  android:maxSdkVersion="28" />
-
-              <application
-                  android:label="A.Jami SOS"
-                  android:name="${applicationName}"
-                  android:icon="@mipmap/ic_launcher"
-                  android:allowBackup="false"
-                  android:fullBackupContent="false"
-                  android:usesCleartextTraffic="false"
-                  android:supportsRtl="true">
-
-                  <activity
-                      android:name=".MainActivity"
-                      android:exported="true"
-                      android:launchMode="singleTop"
-                      android:theme="@style/LaunchTheme"
-                      android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-                      android:hardwareAccelerated="true"
-                      android:windowSoftInputMode="adjustResize">
-                      <meta-data
-                          android:name="io.flutter.embedding.android.NormalTheme"
-                          android:resource="@style/NormalTheme" />
-                      <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
-                      </intent-filter>
-                  </activity>
-
-                  <receiver
-                      android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
-                      android:exported="false" />
-                  <receiver
-                      android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
-                      android:exported="false">
-                      <intent-filter>
-                          <action android:name="android.intent.action.BOOT_COMPLETED" />
-                          <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-                          <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-                          <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
-                      </intent-filter>
-                  </receiver>
-
-                  <meta-data
-                      android:name="flutterEmbedding"
-                      android:value="2" />
-              </application>
-
-              <queries>
-                  <intent>
-                      <action android:name="android.intent.action.PROCESS_TEXT" />
-                      <data android:mimeType="text/plain" />
-                  </intent>
-                  <intent>
-                      <action android:name="android.speech.RecognitionService" />
-                  </intent>
-                  <intent>
-                      <action android:name="android.intent.action.VIEW" />
-                      <data android:scheme="https" />
-                  </intent>
-              </queries>
-          </manifest>
-          EOF
-          cat > android/app/build.gradle <<'EOF'
-          plugins {
-              id "com.android.application"
-              id "org.jetbrains.kotlin.android"
-              id "dev.flutter.flutter-gradle-plugin"
-          }
-
-          def keystoreProperties = new Properties()
-          def keystorePropertiesFile = rootProject.file('key.properties')
-          if (keystorePropertiesFile.exists()) {
-              keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-          }
-
-          android {
-              namespace "com.ajami.sos"
-              compileSdk flutter.compileSdkVersion
-              ndkVersion flutter.ndkVersion
-
-              compileOptions {
-                  coreLibraryDesugaringEnabled true
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
-              }
-
-              kotlinOptions {
-                  jvmTarget = '17'
-              }
-
-              defaultConfig {
-                  applicationId "com.ajami.sos"
-                  minSdk 23
-                  targetSdk flutter.targetSdkVersion
-                  versionCode flutter.versionCode
-                  versionName flutter.versionName
-                  manifestPlaceholders = [appAuthRedirectScheme: 'msauth']
-              }
-
-              signingConfigs {
-                  release {
-                      if (keystorePropertiesFile.exists()) {
-                          keyAlias keystoreProperties['keyAlias']
-                          keyPassword keystoreProperties['keyPassword']
-                          storeFile file(keystoreProperties['storeFile'])
-                          storePassword keystoreProperties['storePassword']
-                      }
-                  }
-              }
-
-              buildTypes {
-                  release {
-                      signingConfig keystorePropertiesFile.exists()
-                          ? signingConfigs.release
-                          : signingConfigs.debug
-                  }
-              }
-          }
-
-          flutter {
-              source "../.."
-          }
-
-          dependencies {
-              coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.1.4"
-          }
-          EOF
 
       - name: Install packages
         run: flutter pub get
@@ -201,11 +39,37 @@ jobs:
         run: flutter test
         continue-on-error: true
 
+      # The android/ folder is committed and complete, so nothing is generated
+      # or overwritten here. `flutter build` still writes local.properties,
+      # the Gradle wrapper and GeneratedPluginRegistrant automatically.
       - name: Build release APK
-        run: flutter build apk --release
+        id: build
+        run: |
+          set -o pipefail
+          flutter build apk --release 2>&1 | tee /tmp/build.log
+
+      # Surfaces the real Gradle/Dart error in the run's annotations, so the
+      # cause is visible even when the raw job log cannot be downloaded.
+      - name: Report build errors
+        if: failure()
+        run: |
+          echo "----- last 80 log lines -----"
+          tail -n 80 /tmp/build.log || true
+          echo "----- key errors -----"
+          grep -nEi "error:|FAILURE:|What went wrong|Caused by:|Execution failed|Could not resolve|e: file|Unsupported class|requires a placeholder" /tmp/build.log \
+            | tail -n 25 | while IFS= read -r line; do
+                echo "::error::${line}"
+              done
+
+      - name: Show APK details
+        run: |
+          ls -lh build/app/outputs/flutter-apk/
+          echo "SHA256:" && sha256sum build/app/outputs/flutter-apk/app-release.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: A.Jami-SOS-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 90

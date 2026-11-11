@@ -18,10 +18,14 @@ class Db {
   Future<Database> _open() async {
     const store = FlutterSecureStorage();
     var key = await store.read(key: _keyName);
-    if (key == null) {
+    if (key == null || key.isEmpty) {
       final rnd = Random.secure();
       key = base64Url.encode(List<int>.generate(32, (_) => rnd.nextInt(256)));
-      await store.write(key: _keyName, value: key);
+      try {
+        await store.write(key: _keyName, value: key);
+      } catch (_) {
+        // Keystore unavailable: keep the generated key in memory for this run.
+      }
     }
     return openDatabase(
       p.join(await getDatabasesPath(), 'sos_secure.db'),

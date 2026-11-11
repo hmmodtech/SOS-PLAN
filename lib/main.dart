@@ -1,25 +1,45 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'core/app_state.dart';
+import 'core/boot_log.dart';
+import 'core/matrix_rain.dart';
 import 'core/theme.dart';
 import 'data/database.dart';
 import 'data/seed.dart';
 import 'screens/home_screen.dart';
 import 'services/notifications.dart';
 import 'services/security.dart';
+import 'services/widget_bridge.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('en_US');
-  await initializeDateFormatting('ar');
-  await appState.load();
-  await Bell.init();
-  if (!appState.seeded) {
-    await Db.instance.replaceMission(missionFrom(DateTime.parse(appState.missionStart)));
-    appState.markSeeded();
-  }
-  await Bell.resyncAll();
+
+  // A crash inside a plugin or an async task must never freeze the UI.
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    logBoot('UI error: ${details.exceptionAsString()}');
+  };
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    logBoot('Uncaught: $error');
+    return true; // handled: keep the app alive
+  };
+
+  // Dark status/navigation bars to match the midnight-blue HUD.
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
+    systemNavigationBarColor: kBlack,
+    systemNavigationBarIconBrightness: Brightness.light,
+  ));
+
+  // Never await anything before runApp(): a single failing plugin call there
+  // leaves the user on a black screen and Android reports "not responding".
   runApp(const SosApp());
 }
 
@@ -50,13 +70,175 @@ class SosApp extends StatelessWidget {
               Positioned.fill(
                 child: appState.matrixRain
                     ? const MatrixRain()
-                    : const ColoredBox(color: kBlack),
+                    : const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: RadialGradient(
+                            center: Alignment.topCenter,
+                            radius: 1.2,
+                            colors: [Color(0xFF0A1830), kBlack],
+                          ),
+                        ),
+                      ),
               ),
               AppGate(child: child!),
             ],
           ),
         ),
-        home: const HomeScreen(),
+        home: const BootGate(),
+      ),
+    );
+  }
+}
+
+/// Runs startup work *after* the first frame and always lands on a UI:
+/// the home screen on success, or a readable error screen with a retry button.
+class BootGate extends StatefulWidget {
+  const BootGate({super.key});
+
+  @override
+  State<BootGate> createState() => _BootGateState();
+}
+
+class _BootGateState extends State<BootGate> {
+  bool _done = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    // Let the splash paint before doing any I/O so the app never looks frozen.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _boot());
+  }
+
+  Future<void> _boot() async {
+    setState(() => _error = null);
+    try {
+      await initializeDateFormatting('en_US');
+      await initializeDateFormatting('ar');
+      await appState.load();
+      await _step('notifications', Bell.init);
+      if (!appState.seeded) {
+        await _step('seed', () async {
+          await Db.instance
+              .replaceMission(missionFrom(DateTime.parse(appState.missionStart)));
+          appState.markSeeded();
+        });
+      }
+      // Re-scheduling bells is the heaviest and most failure-prone step, so it
+      // runs last and never blocks the UI.
+      unawaited(_step('reminders', Bell.resyncAll));
+      // Move memos typed on the home-screen widget into the database, then
+      // publish a fresh snapshot for the widgets.
+      unawaited(_step('widgets', () async {
+        await WidgetBridge.applyPending();
+        await WidgetBridge.sync();
+      }));
+      if (!mounted) return;
+      setState(() => _done = true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    }
+  }
+
+  /// Runs one startup step; failures are recorded but do not abort startup.
+  Future<void> _step(String name, Future<void> Function() action) async {
+    try {
+      await action();
+    } catch (e) {
+      logBoot('$name: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_done) return const HomeScreen();
+    if (_error != null) {
+      return _BootError(
+        message: _error!,
+        log: bootLog,
+        onRetry: _boot,
+        onSkip: () => setState(() => _done = true),
+      );
+    }
+    return const _Splash();
+  }
+}
+
+class _Splash extends StatelessWidget {
+  const _Splash();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: kBlack,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.shield_outlined, color: kGreen, size: 64),
+            const SizedBox(height: 20),
+            const SizedBox(width: 120, child: GlowBar(value: 0.6, height: 3)),
+            const SizedBox(height: 14),
+            Text(
+              'A.Jami SOS',
+              style: const TextStyle(
+                color: kGreen,
+                letterSpacing: 3,
+                fontWeight: FontWeight.w700,
+                shadows: kTextBloom,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BootError extends StatelessWidget {
+  final String message;
+  final List<String> log;
+  final Future<void> Function() onRetry;
+  final VoidCallback onSkip;
+
+  const _BootError({
+    required this.message,
+    required this.log,
+    required this.onRetry,
+    required this.onSkip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: kBlack,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Startup error',
+                style: TextStyle(color: kRed, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: SelectableText(
+                    [message, if (log.isNotEmpty) '--- log ---', ...log].join('\n'),
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+              const SizedBox(height: 8),
+              OutlinedButton(onPressed: onSkip, child: const Text('Open anyway')),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -105,9 +287,12 @@ class _AppGateState extends State<AppGate> with WidgetsBindingObserver {
     _authing = true;
     final ok = await unlockDevice();
     _authing = false;
+    if (!mounted) return;
     if (ok) {
       appState.setLocked(false);
       appState.setPanic(false);
+    } else {
+      setState(() {}); // show the unlock button again
     }
   }
 
@@ -154,6 +339,19 @@ class _AppGateState extends State<AppGate> with WidgetsBindingObserver {
                       onPressed: _unlock,
                       child: Text(appState.t('UNLOCK', 'فتح القفل')),
                     ),
+                    const SizedBox(height: 8),
+                    // Escape hatch: never leave the user stuck behind a detector
+                    // that keeps failing (e.g. no fingerprint enrolled).
+                    TextButton(
+                      onPressed: () {
+                        appState.setLock(false);
+                        appState.setLocked(false);
+                      },
+                      child: Text(
+                        appState.t('Disable app lock', 'إيقاف قفل التطبيق'),
+                        style: const TextStyle(color: Colors.white38, fontSize: 12),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -163,4 +361,3 @@ class _AppGateState extends State<AppGate> with WidgetsBindingObserver {
     );
   }
 }
-
